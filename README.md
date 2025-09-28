@@ -249,7 +249,48 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ## 🚀 Deployment
 
-ดูคู่มือการ deploy ที่ [DEPLOYMENT.md](./DEPLOYMENT.md)
+### Development Setup
+```bash
+# Clone repository
+git clone https://github.com/your-username/pet-health-docs.git
+cd pet-health-docs
+
+# Install dependencies
+cd backend && npm install
+cd ../frontend && npm install
+
+# Start development servers
+cd backend && npm run dev
+cd frontend && npm start
+```
+
+### Production Deployment
+
+#### Option 1: Quick Deployment
+```bash
+# Automated deployment script
+chmod +x scripts/production-deploy.sh
+./scripts/production-deploy.sh
+```
+
+#### Option 2: Manual Deployment
+```bash
+# Use Docker Compose for production
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+#### Option 3: Cloud Deployment
+- **DigitalOcean**: See [DEPLOYMENT_CLOUD.md](DEPLOYMENT_CLOUD.md)
+- **AWS**: See [DEPLOYMENT_CLOUD.md](DEPLOYMENT_CLOUD.md)
+- **Google Cloud**: See [DEPLOYMENT_CLOUD.md](DEPLOYMENT_CLOUD.md)
+
+### Monitoring & Logging
+- **Error Tracking**: Sentry integration
+- **Uptime Monitoring**: UptimeRobot, Pingdom
+- **Logging**: Logtail, structured logging
+- **Performance**: Custom monitoring setup
+
+See [MONITORING_SETUP.md](MONITORING_SETUP.md) for detailed setup.
 
 ## 📋 Production Checklist
 

@@ -1,218 +1,326 @@
-# ✅ Production Deployment Checklist
+# 🚀 Production Deployment Checklist
 
-## 🔧 Pre-Deployment
+## 📋 Pre-Deployment Checklist
 
-### Environment Setup
-- [ ] **Supabase Production Database** configured
-- [ ] **Environment variables** set correctly
-- [ ] **SSL certificates** obtained and configured
-- [ ] **Domain name** pointed to server
-- [ ] **Email service** configured (SMTP)
-- [ ] **Monitoring services** set up (Sentry, Logtail)
+### ✅ Environment Setup
+- [ ] **Supabase Production Database**
+  - [ ] Create production Supabase project
+  - [ ] Run database migrations
+  - [ ] Configure RLS policies
+  - [ ] Set up database backups
 
-### Security
-- [ ] **Strong JWT secret** generated
-- [ ] **Database credentials** secured
-- [ ] **API rate limiting** configured
-- [ ] **CORS settings** properly configured
-- [ ] **File upload security** implemented
-- [ ] **Input validation** enabled
+- [ ] **Environment Variables**
+  - [ ] Create `backend/.env.production`
+  - [ ] Set strong JWT secret (32+ characters)
+  - [ ] Configure Supabase production URLs and keys
+  - [ ] Set production CORS origins
+  - [ ] Configure file upload limits
 
-### Code Quality
-- [ ] **All tests** passing
-- [ ] **Code review** completed
-- [ ] **Security audit** performed
-- [ ] **Performance testing** done
-- [ ] **Error handling** implemented
+- [ ] **Domain & SSL**
+  - [ ] Purchase domain name
+  - [ ] Obtain SSL certificate (Let's Encrypt recommended)
+  - [ ] Configure DNS records
+  - [ ] Test SSL certificate
 
-## 🐳 Docker Configuration
+### ✅ Security Configuration
+- [ ] **Authentication**
+  - [ ] Strong JWT secret
+  - [ ] Secure password policies
+  - [ ] Rate limiting configured
+  - [ ] CORS properly configured
 
-### Backend
-- [ ] **Dockerfile** optimized
-- [ ] **Health check** implemented
-- [ ] **Logging** configured
-- [ ] **File permissions** set correctly
-- [ ] **Dependencies** minimized
+- [ ] **File Upload Security**
+  - [ ] File type validation
+  - [ ] File size limits
+  - [ ] Malware scanning (optional)
+  - [ ] Secure file storage
 
-### Frontend
-- [ ] **Build process** optimized
-- [ ] **Static assets** cached
-- [ ] **Nginx configuration** proper
-- [ ] **Security headers** set
-- [ ] **Gzip compression** enabled
+- [ ] **Database Security**
+  - [ ] RLS policies enabled
+  - [ ] Strong database passwords
+  - [ ] Regular security audits
+  - [ ] Backup encryption
 
-### Infrastructure
-- [ ] **Docker Compose** configured
-- [ ] **Network** properly set up
-- [ ] **Volumes** configured
-- [ ] **Ports** exposed correctly
-- [ ] **Health checks** working
+### ✅ Monitoring & Logging
+- [ ] **Error Tracking**
+  - [ ] Sentry DSN configured
+  - [ ] Error alerting setup
+  - [ ] Performance monitoring
+
+- [ ] **Logging**
+  - [ ] Log aggregation setup
+  - [ ] Log retention policies
+  - [ ] Log analysis tools
+
+- [ ] **Health Monitoring**
+  - [ ] Health check endpoints
+  - [ ] Uptime monitoring
+  - [ ] Resource monitoring
 
 ## 🚀 Deployment Process
 
-### Pre-Deployment
-- [ ] **Backup** current system
-- [ ] **Test** deployment in staging
-- [ ] **Verify** all services
-- [ ] **Check** resource requirements
-- [ ] **Prepare** rollback plan
+### Step 1: Server Preparation
+```bash
+# Update system
+sudo apt update && sudo apt upgrade -y
 
-### Deployment
-- [ ] **Stop** existing services
-- [ ] **Build** new images
-- [ ] **Start** new services
-- [ ] **Verify** health checks
-- [ ] **Test** all endpoints
+# Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
 
-### Post-Deployment
-- [ ] **Monitor** system health
-- [ ] **Check** logs for errors
-- [ ] **Verify** all features work
-- [ ] **Test** user workflows
-- [ ] **Monitor** performance
+# Install Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
 
-## 🔍 Monitoring & Maintenance
+# Create deployment user
+sudo useradd -m -s /bin/bash deploy
+sudo usermod -aG docker deploy
+```
 
-### Health Monitoring
-- [ ] **API health** endpoint working
-- [ ] **Database connectivity** verified
-- [ ] **File upload** functionality tested
-- [ ] **Email notifications** working
-- [ ] **User authentication** working
+### Step 2: Application Deployment
+```bash
+# Clone repository
+git clone https://github.com/your-username/pet-health-docs.git
+cd pet-health-docs
 
-### Performance Monitoring
-- [ ] **Response times** acceptable
-- [ ] **Memory usage** within limits
-- [ ] **CPU usage** normal
-- [ ] **Disk space** sufficient
-- [ ] **Network traffic** normal
+# Make deployment script executable
+chmod +x scripts/production-deploy.sh
 
-### Security Monitoring
-- [ ] **Failed login attempts** monitored
-- [ ] **Suspicious activity** detected
-- [ ] **File uploads** scanned
-- [ ] **API abuse** prevented
-- [ ] **Data breaches** prevented
+# Run deployment
+./scripts/production-deploy.sh
+```
 
-## 📊 Database & Storage
+### Step 3: Post-Deployment Configuration
+```bash
+# Configure SSL certificates
+sudo cp your-cert.pem nginx/ssl/cert.pem
+sudo cp your-key.pem nginx/ssl/key.pem
 
-### Database
-- [ ] **Production database** configured
-- [ ] **RLS policies** enabled
-- [ ] **Backup strategy** implemented
-- [ ] **Migration scripts** tested
-- [ ] **Data integrity** verified
+# Update nginx configuration
+sudo nano nginx/nginx.conf
 
-### File Storage
-- [ ] **Upload directory** created
-- [ ] **File permissions** set
-- [ ] **Storage limits** configured
-- [ ] **Backup strategy** for files
-- [ ] **Cleanup process** for old files
+# Restart nginx
+docker-compose -f docker-compose.prod.yml restart nginx
+```
 
-## 🔐 Security Checklist
+## 🔍 Post-Deployment Verification
 
-### Authentication & Authorization
-- [ ] **JWT tokens** properly configured
-- [ ] **Password hashing** secure
-- [ ] **Role-based access** working
-- [ ] **Session management** secure
-- [ ] **Logout functionality** working
+### ✅ Health Checks
+- [ ] **Backend API**
+  - [ ] `curl http://your-domain.com:5000/api/health`
+  - [ ] Authentication endpoints working
+  - [ ] File upload working
+  - [ ] Database connections working
 
-### API Security
-- [ ] **Rate limiting** enabled
-- [ ] **Input validation** comprehensive
-- [ ] **SQL injection** prevention
-- [ ] **XSS protection** enabled
-- [ ] **CSRF protection** implemented
+- [ ] **Frontend**
+  - [ ] `curl http://your-domain.com`
+  - [ ] All pages loading
+  - [ ] User registration/login working
+  - [ ] File uploads working
 
-### File Security
-- [ ] **File type validation** strict
-- [ ] **File size limits** enforced
-- [ ] **Malware scanning** enabled
-- [ ] **Secure file serving** configured
-- [ ] **Access control** for files
+- [ ] **SSL/HTTPS**
+  - [ ] `curl https://your-domain.com`
+  - [ ] SSL certificate valid
+  - [ ] HTTPS redirect working
+  - [ ] Security headers present
 
-## 📱 User Experience
+### ✅ Functionality Tests
+- [ ] **User Registration/Login**
+  - [ ] New user can register
+  - [ ] Existing user can login
+  - [ ] Password reset working
+  - [ ] Email verification (if enabled)
 
-### Frontend
-- [ ] **All pages** load correctly
-- [ ] **Navigation** works properly
-- [ ] **Forms** submit successfully
-- [ ] **Images** display correctly
-- [ ] **Responsive design** works
+- [ ] **Pet Management**
+  - [ ] Add new pet
+  - [ ] Edit pet information
+  - [ ] Upload pet images
+  - [ ] Delete pet
 
-### Backend
-- [ ] **API endpoints** responding
-- [ ] **Error messages** user-friendly
-- [ ] **Data validation** working
-- [ ] **File uploads** successful
-- [ ] **Email notifications** sent
+- [ ] **Appointment System**
+  - [ ] Book appointment
+  - [ ] View appointments
+  - [ ] Update appointment status
+  - [ ] Cancel appointment
 
-## 🚨 Emergency Procedures
+- [ ] **Admin Functions**
+  - [ ] User management
+  - [ ] Content approval
+  - [ ] System statistics
+  - [ ] Admin dashboard
 
-### Rollback Plan
-- [ ] **Rollback procedure** documented
-- [ ] **Backup restoration** tested
-- [ ] **Service restart** procedure
-- [ ] **Database rollback** plan
-- [ ] **Communication plan** ready
+### ✅ Performance Tests
+- [ ] **Load Testing**
+  - [ ] Concurrent users (10+)
+  - [ ] File upload performance
+  - [ ] Database query performance
+  - [ ] Memory usage monitoring
 
-### Incident Response
-- [ ] **Monitoring alerts** configured
-- [ ] **Response team** identified
-- [ ] **Escalation procedure** defined
-- [ ] **Communication channels** established
-- [ ] **Recovery procedures** documented
+- [ ] **Response Times**
+  - [ ] API response < 500ms
+  - [ ] Page load < 3 seconds
+  - [ ] File upload < 10 seconds
+  - [ ] Database queries < 100ms
+
+## 🛡️ Security Verification
+
+### ✅ Security Headers
+- [ ] **HTTPS Enforcement**
+  - [ ] HTTP to HTTPS redirect
+  - [ ] HSTS headers
+  - [ ] Secure cookies
+
+- [ ] **CORS Configuration**
+  - [ ] Proper CORS origins
+  - [ ] No wildcard origins
+  - [ ] Credentials handling
+
+- [ ] **Authentication**
+  - [ ] JWT token validation
+  - [ ] Session management
+  - [ ] Password policies
+
+### ✅ Data Protection
+- [ ] **File Upload Security**
+  - [ ] File type validation
+  - [ ] File size limits
+  - [ ] Secure file storage
+  - [ ] Access controls
+
+- [ ] **Database Security**
+  - [ ] RLS policies active
+  - [ ] Encrypted connections
+  - [ ] Regular backups
+  - [ ] Access logging
+
+## 📊 Monitoring Setup
+
+### ✅ Application Monitoring
+- [ ] **Error Tracking**
+  - [ ] Sentry integration
+  - [ ] Error alerting
+  - [ ] Performance monitoring
+
+- [ ] **Logging**
+  - [ ] Structured logging
+  - [ ] Log aggregation
+  - [ ] Log retention
+  - [ ] Log analysis
+
+### ✅ Infrastructure Monitoring
+- [ ] **Server Monitoring**
+  - [ ] CPU usage
+  - [ ] Memory usage
+  - [ ] Disk space
+  - [ ] Network traffic
+
+- [ ] **Database Monitoring**
+  - [ ] Query performance
+  - [ ] Connection pools
+  - [ ] Storage usage
+  - [ ] Backup status
+
+## 🔄 Backup Strategy
+
+### ✅ Data Backups
+- [ ] **Database Backups**
+  - [ ] Automated daily backups
+  - [ ] Backup retention (30 days)
+  - [ ] Backup verification
+  - [ ] Offsite backup storage
+
+- [ ] **File Backups**
+  - [ ] Uploaded files backup
+  - [ ] Configuration backup
+  - [ ] Log file backup
+  - [ ] Backup encryption
+
+### ✅ Disaster Recovery
+- [ ] **Recovery Procedures**
+  - [ ] Database restore process
+  - [ ] File restore process
+  - [ ] Service restart procedures
+  - [ ] Rollback procedures
+
+- [ ] **Testing**
+  - [ ] Backup restore testing
+  - [ ] Disaster recovery drills
+  - [ ] Documentation updates
+  - [ ] Team training
 
 ## 📈 Performance Optimization
 
-### Caching
-- [ ] **Static assets** cached
-- [ ] **API responses** cached where appropriate
-- [ ] **Database queries** optimized
-- [ ] **CDN** configured if needed
-- [ ] **Cache invalidation** strategy
+### ✅ Caching
+- [ ] **Application Caching**
+  - [ ] API response caching
+  - [ ] Database query caching
+  - [ ] Static asset caching
+  - [ ] CDN integration
 
-### Resource Management
-- [ ] **Memory usage** optimized
-- [ ] **CPU usage** efficient
-- [ ] **Disk I/O** minimized
-- [ ] **Network usage** optimized
-- [ ] **Database connections** pooled
+### ✅ Database Optimization
+- [ ] **Query Optimization**
+  - [ ] Index optimization
+  - [ ] Query performance analysis
+  - [ ] Connection pooling
+  - [ ] Database monitoring
 
-## 📋 Documentation
+### ✅ Resource Optimization
+- [ ] **Server Resources**
+  - [ ] CPU optimization
+  - [ ] Memory optimization
+  - [ ] Disk I/O optimization
+  - [ ] Network optimization
 
-### Technical Documentation
-- [ ] **API documentation** updated
-- [ ] **Database schema** documented
-- [ ] **Deployment guide** complete
-- [ ] **Troubleshooting guide** ready
-- [ ] **Maintenance procedures** documented
+## 🆘 Troubleshooting
 
-### User Documentation
-- [ ] **User manual** updated
-- [ ] **FAQ** section complete
-- [ ] **Support contact** information
-- [ ] **Feature documentation** current
-- [ ] **Video tutorials** if applicable
+### ✅ Common Issues
+- [ ] **Service Issues**
+  - [ ] Container restart procedures
+  - [ ] Log analysis procedures
+  - [ ] Performance debugging
+  - [ ] Error resolution
+
+- [ ] **Database Issues**
+  - [ ] Connection troubleshooting
+  - [ ] Query optimization
+  - [ ] Backup/restore procedures
+  - [ ] Performance tuning
+
+### ✅ Support Procedures
+- [ ] **Documentation**
+  - [ ] Runbook creation
+  - [ ] Troubleshooting guides
+  - [ ] Contact information
+  - [ ] Escalation procedures
 
 ## ✅ Final Verification
 
-### System Health
-- [ ] **All services** running
-- [ ] **No critical errors** in logs
-- [ ] **Performance metrics** acceptable
-- [ ] **Security scans** passed
-- [ ] **User acceptance testing** completed
+### ✅ Production Readiness
+- [ ] All health checks passing
+- [ ] All functionality tests passing
+- [ ] Security verification complete
+- [ ] Performance requirements met
+- [ ] Monitoring setup complete
+- [ ] Backup strategy implemented
+- [ ] Documentation updated
+- [ ] Team training completed
 
-### Go-Live Readiness
-- [ ] **Team** trained on new system
-- [ ] **Support procedures** in place
-- [ ] **Monitoring** active
-- [ ] **Backup systems** ready
-- [ ] **Communication plan** executed
+### ✅ Go-Live Checklist
+- [ ] Domain configured
+- [ ] SSL certificate active
+- [ ] DNS records updated
+- [ ] Firewall rules configured
+- [ ] Monitoring alerts active
+- [ ] Backup procedures tested
+- [ ] Support procedures ready
+- [ ] Go-live announcement prepared
 
 ---
 
-**หมายเหตุ**: ตรวจสอบทุกรายการก่อนการ deployment เพื่อให้แน่ใจว่าระบบพร้อมสำหรับ production environment
+**🎉 Congratulations! Your Pet Health Assistant is ready for production!**
+
+**Next Steps:**
+1. Monitor system performance
+2. Gather user feedback
+3. Plan feature updates
+4. Scale as needed
