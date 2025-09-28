@@ -1,0 +1,281 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
+import { useAuth } from "../contexts/AuthContext"
+import { Menu, X, Home, Calendar, Bell, FileText, Utensils, LogOut, PawPrint, Settings, User } from "lucide-react"
+
+const Navbar = () => {
+  const { user, logout } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [profileImage, setProfileImage] = useState(null)
+
+  // Load profile image when user changes
+  useEffect(() => {
+    if (user?.profile_picture_url) {
+      // If it's already a base64 image, use it directly
+      if (user.profile_picture_url.startsWith('data:')) {
+        setProfileImage(user.profile_picture_url)
+      } else {
+        // Try to load and convert to base64
+        const loadImage = async () => {
+          try {
+            const filename = user.profile_picture_url.includes('/') ? user.profile_picture_url.split('/').pop() : user.profile_picture_url
+            const response = await fetch(`http://localhost:5000/api/upload/image/${filename}`, {
+              mode: 'cors',
+              credentials: 'omit'
+            })
+            if (response.ok) {
+              const blob = await response.blob()
+              const reader = new FileReader()
+              reader.onload = (e) => setProfileImage(e.target.result)
+              reader.readAsDataURL(blob)
+            } else {
+              setProfileImage(null)
+            }
+          } catch (error) {
+            console.error('Failed to load profile image:', error)
+            setProfileImage(null)
+          }
+        }
+        loadImage()
+      }
+    } else {
+      setProfileImage(null)
+    }
+  }, [user?.profile_picture_url])
+
+  const handleLogout = () => {
+    logout()
+    navigate("/")
+    setIsMenuOpen(false)
+  }
+
+  // Navigation items for all users (including guests)
+  const navigation = [
+    { name: "หน้าแรก", href: "/", icon: Home },
+    { name: "บทความ", href: "/articles", icon: FileText },
+  ]
+
+  // Navigation items for authenticated users based on their role
+  const userNavigation = user
+    ? [
+        // Dashboard - different for each role
+        { 
+          name: "แดชบอร์ด", 
+          href: user.role === "veterinarian" ? "/vet-dashboard" 
+               : user.role === "admin" ? "/admin" 
+               : "/dashboard", 
+          icon: Home 
+        },
+        
+        // Appointments - available for all authenticated users
+        { name: "การนัดหมาย", href: "/appointments", icon: Calendar },
+        
+        // Role-specific navigation
+        ...(user.role === "veterinarian" 
+          ? [
+              { name: "สัตว์เลี้ยง", href: "/pets", icon: PawPrint },
+              { name: "งานของฉัน", href: "/notifications", icon: Bell }
+            ]
+          : user.role === "admin"
+          ? [
+              { name: "สัตว์เลี้ยง", href: "/pets", icon: PawPrint }
+            ]
+          : [
+              { name: "การแจ้งเตือน", href: "/notifications", icon: Bell }
+            ]
+        ),
+        
+        // Nutrition - available for all authenticated users
+        { name: "คำแนะนำโภชนาการ", href: "/nutrition", icon: Utensils },
+      ]
+    : []
+
+  return (
+    <nav className="bg-white shadow-lg sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          {/* Logo */}
+          <div className="flex items-center">
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">🐾</span>
+              </div>
+              <span className="text-xl font-bold text-gray-900">Pet Health</span>
+            </Link>
+          </div>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  location.pathname === item.href
+                    ? "text-green-600 bg-green-50"
+                    : "text-gray-700 hover:text-green-600 hover:bg-green-50"
+                }`}
+              >
+                <item.icon className="h-4 w-4" />
+                <span>{item.name}</span>
+              </Link>
+            ))}
+
+            {user &&
+              userNavigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    location.pathname === item.href
+                      ? "text-green-600 bg-green-50"
+                      : "text-gray-700 hover:text-green-600 hover:bg-green-50"
+                  }`}
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.name}</span>
+                </Link>
+              ))}
+          </div>
+
+          {/* User Menu */}
+          <div className="hidden md:flex items-center space-x-4">
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <Link
+                  to="/profile"
+                  className="flex items-center space-x-2 text-gray-700 hover:text-green-600 transition-colors"
+                >
+                  <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                    {profileImage ? (
+                      <img 
+                        src={profileImage} 
+                        alt={user.full_name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none'
+                          e.target.nextSibling.style.display = 'flex'
+                        }}
+                      />
+                    ) : null}
+                    <div className={`w-full h-full flex items-center justify-center ${profileImage ? 'hidden' : 'flex'}`}>
+                      <User className="h-4 w-4 text-gray-400" />
+                    </div>
+                  </div>
+                  <span className="text-sm font-medium">{user.full_name}</span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center space-x-1 text-gray-700 hover:text-red-600 transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>ออกจากระบบ</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Link to="/login" className="text-gray-700 hover:text-green-600 font-medium">
+                  เข้าสู่ระบบ
+                </Link>
+                <Link to="/register" className="btn-primary">
+                  สมัครสมาชิก
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="text-gray-700 hover:text-green-600 focus:outline-none"
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Navigation */}
+      {isMenuOpen && (
+        <div className="md:hidden bg-white border-t border-gray-200">
+          <div className="px-2 pt-2 pb-3 space-y-1">
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                onClick={() => setIsMenuOpen(false)}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium ${
+                  location.pathname === item.href
+                    ? "text-green-600 bg-green-50"
+                    : "text-gray-700 hover:text-green-600 hover:bg-green-50"
+                }`}
+              >
+                <item.icon className="h-5 w-5" />
+                <span>{item.name}</span>
+              </Link>
+            ))}
+
+            {user &&
+              userNavigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium ${
+                    location.pathname === item.href
+                      ? "text-green-600 bg-green-50"
+                      : "text-gray-700 hover:text-green-600 hover:bg-green-50"
+                  }`}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.name}</span>
+                </Link>
+              ))}
+
+            <div className="border-t border-gray-200 pt-4">
+              {user ? (
+                <div className="space-y-2">
+                  <div className="px-3 py-2">
+                    <p className="text-sm text-gray-500">สวัสดี,</p>
+                    <p className="text-base font-medium text-gray-900">{user.full_name}</p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center space-x-2 w-full px-3 py-2 text-left text-red-600 hover:bg-red-50 rounded-md"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    <span>ออกจากระบบ</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md"
+                  >
+                    เข้าสู่ระบบ
+                  </Link>
+                  <Link
+                    to="/register"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block px-3 py-2 text-base font-medium bg-green-500 text-white hover:bg-green-600 rounded-md"
+                  >
+                    สมัครสมาชิก
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </nav>
+  )
+}
+
+export default Navbar

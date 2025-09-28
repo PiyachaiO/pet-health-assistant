@@ -1,0 +1,1062 @@
+openapi: 3.0.3
+info:
+  title: Pet Health Assistant API
+  description: API สำหรับระบบผู้ช่วยสุขภาพสัตว์เลี้ยง
+  version: 1.0.0
+  contact:
+    name: Pet Health Assistant Team
+    email: support@pethealthassistant.com
+
+servers:
+  - url: https://api.pethealthassistant.com/v1
+    description: Production server
+  - url: https://staging-api.pethealthassistant.com/v1
+    description: Staging server
+
+paths:
+  # Authentication endpoints
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: สมัครสมาชิกใหม่
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - full_name
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                full_name:
+                  type: string
+                phone:
+                  type: string
+                role:
+                  type: string
+                  enum: [user, veterinarian]
+                  default: user
+      responses:
+        '201':
+          description: สมัครสมาชิกสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: เข้าสู่ระบบ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: เข้าสู่ระบบสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: ออกจากระบบ
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: ออกจากระบบสำเร็จ
+
+  # User endpoints
+  /users/profile:
+    get:
+      tags:
+        - Users
+      summary: ดูข้อมูลโปรไฟล์
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: ข้อมูลโปรไฟล์
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+    put:
+      tags:
+        - Users
+      summary: แก้ไขข้อมูลโปรไฟล์
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: แก้ไขข้อมูลสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  # Pet endpoints
+  /pets:
+    get:
+      tags:
+        - Pets
+      summary: ดูรายการสัตว์เลี้ยงของผู้ใช้
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: รายการสัตว์เลี้ยง
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Pet'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      tags:
+        - Pets
+      summary: เพิ่มสัตว์เลี้ยงใหม่
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetCreate'
+      responses:
+        '201':
+          description: เพิ่มสัตว์เลี้ยงสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+
+  /pets/{petId}:
+    get:
+      tags:
+        - Pets
+      summary: ดูข้อมูลสัตว์เลี้ยง
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: ข้อมูลสัตว์เลี้ยง
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+
+    put:
+      tags:
+        - Pets
+      summary: แก้ไขข้อมูลสัตว์เลี้ยง
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetUpdate'
+      responses:
+        '200':
+          description: แก้ไขข้อมูลสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+
+    delete:
+      tags:
+        - Pets
+      summary: ลบสัตว์เลี้ยง
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: ลบสำเร็จ
+
+  # Health Records endpoints
+  /pets/{petId}/health-records:
+    get:
+      tags:
+        - Health Records
+      summary: ดูประวัติสุขภาพสัตว์เลี้ยง
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [vaccination, medication, checkup, surgery, illness, injury]
+      responses:
+        '200':
+          description: ประวัติสุขภาพ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HealthRecord'
+
+    post:
+      tags:
+        - Health Records
+      summary: เพิ่มบันทึกสุขภาพ
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HealthRecordCreate'
+      responses:
+        '201':
+          description: เพิ่มบันทึกสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthRecord'
+
+  # Notifications endpoints
+  /notifications:
+    get:
+      tags:
+        - Notifications
+      summary: ดูการแจ้งเตือน
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [all, unread, completed, pending]
+            default: all
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [vaccination, medication, checkup, nutrition, general]
+      responses:
+        '200':
+          description: รายการการแจ้งเตือน
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+
+  /notifications/{notificationId}/mark-read:
+    patch:
+      tags:
+        - Notifications
+      summary: ทำเครื่องหมายอ่านแล้ว
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: ทำเครื่องหมายสำเร็จ
+
+  /notifications/{notificationId}/mark-completed:
+    patch:
+      tags:
+        - Notifications
+      summary: ทำเครื่องหมายเสร็จสิ้น
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: ทำเครื่องหมายสำเร็จ
+
+  # Appointments endpoints
+  /appointments:
+    get:
+      tags:
+        - Appointments
+      summary: ดูรายการนัดหมาย
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [scheduled, confirmed, completed, cancelled]
+        - name: from_date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to_date
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: รายการนัดหมาย
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Appointment'
+
+    post:
+      tags:
+        - Appointments
+      summary: จองนัดหมาย
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentCreate'
+      responses:
+        '201':
+          description: จองนัดหมายสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+
+  # Articles endpoints
+  /articles:
+    get:
+      tags:
+        - Articles
+      summary: ดูรายการบทความ
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: รายการบทความ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /articles/{articleId}:
+    get:
+      tags:
+        - Articles
+      summary: ดูบทความ
+      parameters:
+        - name: articleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: เนื้อหาบทความ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+
+  # Nutrition endpoints
+  /pets/{petId}/nutrition:
+    get:
+      tags:
+        - Nutrition
+      summary: ดูคำแนะนำโภชนาการ
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: คำแนะนำโภชนาการ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NutritionGuideline'
+
+  # Veterinarian endpoints
+  /veterinarians:
+    get:
+      tags:
+        - Veterinarians
+      summary: ดูรายการสัตวแพทย์
+      parameters:
+        - name: specialization
+          in: query
+          schema:
+            type: string
+        - name: location
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: รายการสัตวแพทย์
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Veterinarian'
+
+  # AI endpoints
+  /ai/nutrition-recommendation:
+    post:
+      tags:
+        - AI
+      summary: ขอคำแนะนำโภชนาการจาก AI
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pet_id
+              properties:
+                pet_id:
+                  type: string
+                  format: uuid
+                symptoms:
+                  type: string
+                current_diet:
+                  type: string
+      responses:
+        '200':
+          description: คำแนะนำจาก AI
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIRecommendation'
+
+  /ai/health-assessment:
+    post:
+      tags:
+        - AI
+      summary: ประเมินสุขภาพจาก AI
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pet_id
+                - symptoms
+              properties:
+                pet_id:
+                  type: string
+                  format: uuid
+                symptoms:
+                  type: string
+                duration:
+                  type: string
+                severity:
+                  type: string
+                  enum: [mild, moderate, severe]
+      responses:
+        '200':
+          description: ผลการประเมินจาก AI
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthAssessment'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        full_name:
+          type: string
+        phone:
+          type: string
+        role:
+          type: string
+          enum: [user, veterinarian, admin]
+        profile_image_url:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    UserUpdate:
+      type: object
+      properties:
+        full_name:
+          type: string
+        phone:
+          type: string
+        profile_image_url:
+          type: string
+
+    Pet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        species:
+          type: string
+        breed:
+          type: string
+        birth_date:
+          type: string
+          format: date
+        gender:
+          type: string
+          enum: [male, female, unknown]
+        weight:
+          type: number
+        color:
+          type: string
+        microchip_id:
+          type: string
+        profile_image_url:
+          type: string
+        special_notes:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    PetCreate:
+      type: object
+      required:
+        - name
+        - species_id
+      properties:
+        name:
+          type: string
+        species_id:
+          type: string
+          format: uuid
+        breed_id:
+          type: string
+          format: uuid
+        birth_date:
+          type: string
+          format: date
+        gender:
+          type: string
+          enum: [male, female, unknown]
+        weight:
+          type: number
+        color:
+          type: string
+        microchip_id:
+          type: string
+        special_notes:
+          type: string
+
+    PetUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        weight:
+          type: number
+        color:
+          type: string
+        special_notes:
+          type: string
+
+    HealthRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        record_type:
+          type: string
+          enum: [vaccination, medication, checkup, surgery, illness, injury]
+        title:
+          type: string
+        description:
+          type: string
+        record_date:
+          type: string
+          format: date
+        next_due_date:
+          type: string
+          format: date
+        cost:
+          type: number
+        veterinarian_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    HealthRecordCreate:
+      type: object
+      required:
+        - record_type
+        - title
+        - record_date
+      properties:
+        record_type:
+          type: string
+          enum: [vaccination, medication, checkup, surgery, illness, injury]
+        title:
+          type: string
+        description:
+          type: string
+        record_date:
+          type: string
+          format: date
+        next_due_date:
+          type: string
+          format: date
+        cost:
+          type: number
+        veterinarian_id:
+          type: string
+          format: uuid
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        notification_type:
+          type: string
+          enum: [vaccination, medication, checkup, nutrition, general]
+        title:
+          type: string
+        message:
+          type: string
+        due_date:
+          type: string
+          format: date
+        is_read:
+          type: boolean
+        is_completed:
+          type: boolean
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        pet_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    Appointment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        appointment_date:
+          type: string
+          format: date-time
+        duration_minutes:
+          type: integer
+        appointment_type:
+          type: string
+          enum: [checkup, vaccination, consultation, surgery, emergency]
+        status:
+          type: string
+          enum: [scheduled, confirmed, completed, cancelled, no_show]
+        notes:
+          type: string
+        cost:
+          type: number
+        pet_name:
+          type: string
+        veterinarian_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    AppointmentCreate:
+      type: object
+      required:
+        - pet_id
+        - veterinarian_id
+        - appointment_date
+        - appointment_type
+      properties:
+        pet_id:
+          type: string
+          format: uuid
+        veterinarian_id:
+          type: string
+          format: uuid
+        appointment_date:
+          type: string
+          format: date-time
+        appointment_type:
+          type: string
+          enum: [checkup, vaccination, consultation, surgery, emergency]
+        notes:
+          type: string
+
+    Article:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        featured_image_url:
+          type: string
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        author_name:
+          type: string
+        view_count:
+          type: integer
+        published_at:
+          type: string
+          format: date-time
+
+    NutritionGuideline:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        daily_calories:
+          type: integer
+        protein_percentage:
+          type: number
+        fat_percentage:
+          type: number
+        carb_percentage:
+          type: number
+        feeding_frequency:
+          type: integer
+        special_instructions:
+          type: string
+        veterinarian_name:
+          type: string
+        assigned_date:
+          type: string
+          format: date
+
+    Veter string
+        assigned_date:
+          type: string
+          format: date
+
+    Veterinarian:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+        license_number:
+          type: string
+        specialization:
+          type: string
+        clinic_name:
+          type: string
+        clinic_address:
+          type: string
+        years_of_experience:
+          type: integer
+        bio:
+          type: string
+        consultation_fee:
+          type: number
+        is_verified:
+          type: boolean
+
+    AIRecommendation:
+      type: object
+      properties:
+        recommendation:
+          type: string
+        confidence_score:
+          type: number
+          minimum: 0
+          maximum: 1
+        suggested_actions:
+          type: array
+          items:
+            type: string
+        veterinarian_consultation_needed:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    HealthAssessment:
+      type: object
+      properties:
+        assessment:
+          type: string
+        risk_level:
+          type: string
+          enum: [low, medium, high, critical]
+        recommendations:
+          type: array
+          items:
+            type: string
+        urgent_care_needed:
+          type: boolean
+        follow_up_days:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    AuthResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          default: bearer
+        expires_in:
+          type: integer
+        user:
+          $ref: '#/components/schemas/User'
+
+    Pagination:
+      type: object
+      properties:
+        current_page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        total_pages:
+          type: integer
+        has_next:
+          type: boolean
+        has_prev:
+          type: boolean
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+
+  responses:
+    BadRequest:
+      description: คำขอไม่ถูกต้อง
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: ไม่มีสิทธิ์เข้าถึง
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Forbidden:
+      description: ไม่อนุญาตให้เข้าถึง
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: ไม่พบข้อมูล
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Conflict:
+      description: ข้อมูลซ้ำ
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    InternalServerError:
+      description: เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

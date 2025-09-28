@@ -1,0 +1,1083 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2025-07-31T10:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "req_health",
+      "parentId": "wrk_pet_health_api",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/health",
+      "name": "Health Check",
+      "description": "ตรวจสอบสถานะ API",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_register",
+      "parentId": "fld_auth",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/auth/register",
+      "name": "Register User",
+      "description": "ลงทะเบียนผู้ใช้ใหม่",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"user@pethealth.com\",\n  \"password\": \"password123\",\n  \"full_name\": \"Test User\",\n  \"role\": \"user\",\n  \"phone\": \"0812345678\",\n  \"address\": \"123 Test Street\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_register_vet",
+      "parentId": "fld_auth",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/auth/register",
+      "name": "Register Veterinarian",
+      "description": "ลงทะเบียนสัตวแพทย์",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"vet@pethealth.com\",\n  \"password\": \"password123\",\n  \"full_name\": \"Dr. Somchai Petvet\",\n  \"role\": \"veterinarian\",\n  \"phone\": \"0812345679\",\n  \"address\": \"123 Veterinary Clinic, Bangkok\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_login",
+      "parentId": "fld_auth",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/auth/login",
+      "name": "Login User",
+      "description": "เข้าสู่ระบบ",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"user@pethealth.com\",\n  \"password\": \"password123\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_profile",
+      "parentId": "fld_users",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/users/profile",
+      "name": "Get Profile",
+      "description": "ดูข้อมูลโปรไฟล์",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_update_profile",
+      "parentId": "fld_users",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/users/profile",
+      "name": "Update Profile",
+      "description": "อัปเดตโปรไฟล์",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"full_name\": \"Updated Name\",\n  \"phone\": \"0898765432\",\n  \"address\": \"456 Updated Street\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_pets",
+      "parentId": "fld_pets",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/pets",
+      "name": "Get All Pets",
+      "description": "ดึงรายการสัตว์เลี้ยงทั้งหมดของผู้ใช้",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_create_pet",
+      "parentId": "fld_pets",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/pets",
+      "name": "Create Pet",
+      "description": "สร้างสัตว์เลี้ยงใหม่",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Buddy\",\n  \"species\": \"dog\",\n  \"breed\": \"Golden Retriever\",\n  \"birth_date\": \"2022-05-15\",\n  \"weight\": 25.5,\n  \"gender\": \"male\",\n  \"color\": \"golden\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_pet",
+      "parentId": "fld_pets",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/pets/{{ _.pet_id }}",
+      "name": "Get Pet",
+      "description": "ดูข้อมูลสัตว์เลี้ยงเฉพาะ",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_update_pet",
+      "parentId": "fld_pets",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/pets/{{ _.pet_id }}",
+      "name": "Update Pet",
+      "description": "อัปเดตข้อมูลสัตว์เลี้ยง",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Buddy Updated\",\n  \"weight\": 26.0,\n  \"color\": \"light golden\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_delete_pet",
+      "parentId": "fld_pets",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/pets/{{ _.pet_id }}",
+      "name": "Delete Pet",
+      "description": "ลบสัตว์เลี้ยง",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_health_records",
+      "parentId": "fld_pets",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/pets/{{ _.pet_id }}/health-records",
+      "name": "Get Health Records",
+      "description": "ดูประวัติสุขภาพสัตว์เลี้ยง",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_create_health_record_vet",
+      "parentId": "fld_pets",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/pets/{{ _.pet_id }}/health-records",
+      "name": "Create Health Record (Vet)",
+      "description": "สร้างประวัติสุขภาพ (สำหรับสัตว์แพทย์)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"record_date\": \"2025-07-31\",\n  \"diagnosis\": \"ไข้หวัด\",\n  \"treatment\": \"ให้ยาลดไข้\",\n  \"weight\": 25.5,\n  \"temperature\": 38.5,\n  \"notes\": \"อาการดีขึ้นแล้ว\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_create_health_record_user",
+      "parentId": "fld_pets",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/pets/{{ _.pet_id }}/health-records",
+      "name": "Create Health Record (User)",
+      "description": "สร้างประวัติสุขภาพ (สำหรับเจ้าของสัตว์)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"record_date\": \"2025-07-31\",\n  \"veterinarian_id\": \"{{ _.vet_id }}\",\n  \"diagnosis\": \"ไข้หวัด\",\n  \"treatment\": \"ให้ยาลดไข้\",\n  \"weight\": 25.5,\n  \"temperature\": 38.5,\n  \"notes\": \"อาการดีขึ้นแล้ว\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_appointments",
+      "parentId": "fld_appointments",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/appointments",
+      "name": "Get Appointments",
+      "description": "ดึงรายการนัดหมาย",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_create_appointment",
+      "parentId": "fld_appointments",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/appointments",
+      "name": "Create Appointment",
+      "description": "สร้างนัดหมายใหม่",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"pet_id\": \"{{ _.pet_id }}\",\n  \"vet_id\": \"{{ _.vet_id }}\",\n  \"appointment_date\": \"2025-08-15T10:00:00Z\",\n  \"reason\": \"Annual checkup\",\n  \"notes\": \"Regular health check\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_vet_appointments",
+      "parentId": "fld_appointments",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/appointments/vet",
+      "name": "Get Vet Appointments",
+      "description": "ดึงรายการนัดหมายสำหรับสัตวแพทย์",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_cancel_appointment",
+      "parentId": "fld_appointments",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/appointments/{{ _.appointment_id }}/cancel",
+      "name": "Cancel Appointment",
+      "description": "ยกเลิกนัดหมาย",
+      "method": "PATCH",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_articles",
+      "parentId": "fld_articles",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/articles",
+      "name": "Get Articles (Public)",
+      "description": "ดึงบทความที่เผยแพร่แล้ว",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_create_article",
+      "parentId": "fld_articles",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/articles",
+      "name": "Create Article (Admin/Vet)",
+      "description": "สร้างบทความใหม่ (เฉพาะ Admin/Vet)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"การดูแลสุขภาพสัตว์เลี้ยง\",\n  \"content\": \"เนื้อหาบทความ...\",\n  \"summary\": \"สรุปบทความ\",\n  \"tags\": [\"health\", \"care\"]\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_notifications",
+      "parentId": "fld_notifications",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/notifications",
+      "name": "Get Notifications",
+      "description": "ดึงการแจ้งเตือน",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_unread_count",
+      "parentId": "fld_notifications",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/notifications/unread/count",
+      "name": "Get Unread Count",
+      "description": "ดึงจำนวนการแจ้งเตือนที่ยังไม่อ่าน",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_mark_read",
+      "parentId": "fld_notifications",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/notifications/{{ _.notification_id }}/read",
+      "name": "Mark as Read",
+      "description": "ทำเครื่องหมายอ่านแล้ว",
+      "method": "PATCH",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_nutrition_guidelines",
+      "parentId": "fld_nutrition",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/nutrition/guidelines",
+      "name": "Get Nutrition Guidelines (Public)",
+      "description": "ดึงแนวทางโภชนาการที่เผยแพร่แล้ว",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_nutrition_recommendations",
+      "parentId": "fld_nutrition",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/nutrition/recommendations",
+      "name": "Get Nutrition Recommendations",
+      "description": "ดึงคำแนะนำโภชนาการ",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_create_nutrition_guideline",
+      "parentId": "fld_nutrition",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/nutrition/guidelines",
+      "name": "Create Nutrition Guideline (Vet/Admin)",
+      "description": "สร้างแนวทางโภชนาการ (เฉพาะ Vet/Admin)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"โภชนาการสำหรับสุนัข\",\n  \"description\": \"แนวทางโภชนาการสำหรับสุนัข\",\n  \"species\": \"dog\",\n  \"age_group\": \"adult\",\n  \"diet_type\": \"dry\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_upload_file",
+      "parentId": "fld_upload",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/upload",
+      "name": "Upload File",
+      "description": "อัปโหลดไฟล์",
+      "method": "POST",
+      "body": {
+        "mimeType": "multipart/form-data",
+        "params": [
+          {
+            "name": "file",
+            "type": "file",
+            "fileName": "",
+            "description": "เลือกไฟล์ที่ต้องการอัปโหลด"
+          }
+        ]
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_uploads",
+      "parentId": "fld_upload",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/upload",
+      "name": "Get Uploads",
+      "description": "ดึงรายการไฟล์ที่อัปโหลด",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_pending_approvals",
+      "parentId": "fld_admin",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/admin/pending-approvals",
+      "name": "Get Pending Approvals",
+      "description": "ดึงรายการรออนุมัติ (Admin)",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_approve_appointment",
+      "parentId": "fld_admin",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/admin/appointments/{{ _.appointment_id }}/approve",
+      "name": "Approve Appointment",
+      "description": "อนุมัติการนัดหมาย (Admin)",
+      "method": "PATCH",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_statistics",
+      "parentId": "fld_admin",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "url": "{{ _.base_url }}/api/admin/statistics",
+      "name": "Get Statistics",
+      "description": "ดึงสถิติระบบ (Admin)",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1754035200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_auth",
+      "parentId": "wrk_pet_health_api",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "name": "🔐 Authentication",
+      "description": "API สำหรับการยืนยันตัวตน",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1754035200000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_users",
+      "parentId": "wrk_pet_health_api",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "name": "👤 Users",
+      "description": "API สำหรับจัดการผู้ใช้",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1754035200000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_pets",
+      "parentId": "wrk_pet_health_api",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "name": "🐾 Pets",
+      "description": "API สำหรับจัดการสัตว์เลี้ยง",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1754035200000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_appointments",
+      "parentId": "wrk_pet_health_api",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "name": "📅 Appointments",
+      "description": "API สำหรับจัดการนัดหมาย",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1754035200000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_articles",
+      "parentId": "wrk_pet_health_api",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "name": "📚 Articles",
+      "description": "API สำหรับจัดการบทความ",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1754035200000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_notifications",
+      "parentId": "wrk_pet_health_api",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "name": "🔔 Notifications",
+      "description": "API สำหรับจัดการการแจ้งเตือน",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1754035200000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_nutrition",
+      "parentId": "wrk_pet_health_api",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "name": "🍖 Nutrition",
+      "description": "API สำหรับจัดการโภชนาการ",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1754035200000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_upload",
+      "parentId": "wrk_pet_health_api",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "name": "📁 File Upload",
+      "description": "API สำหรับอัปโหลดไฟล์",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1754035200000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_admin",
+      "parentId": "wrk_pet_health_api",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "name": "⚙️ Admin",
+      "description": "API สำหรับผู้ดูแลระบบ",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1754035200000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "wrk_pet_health_api",
+      "parentId": null,
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "name": "Pet Health Assistant API",
+      "description": "API Collection สำหรับระบบจัดการสุขภาพสัตว์เลี้ยง",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "env_development",
+      "parentId": "wrk_pet_health_api",
+      "modified": 1754035200000,
+      "created": 1754035200000,
+      "name": "Development",
+      "data": {
+        "base_url": "http://localhost:5000",
+        "access_token": "",
+        "pet_id": "",
+        "vet_id": "",
+        "appointment_id": "",
+        "notification_id": ""
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "access_token",
+          "pet_id",
+          "vet_id",
+          "appointment_id",
+          "notification_id"
+        ]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1754035200000,
+      "_type": "environment"
+    }
+  ]
+} 
