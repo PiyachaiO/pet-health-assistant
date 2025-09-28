@@ -39,6 +39,18 @@ MAX_FILE_SIZE=10485760
 UPLOAD_PATH=/app/uploads
 ALLOWED_FILE_TYPES=image/jpeg,image/png,image/gif,image/webp
 
+# CORS Configuration
+CORS_ORIGIN=https://your-domain.com
+
+# JWT Configuration
+JWT_SECRET=your_strong_production_jwt_secret
+JWT_EXPIRES_IN=7d
+
+# File Upload Configuration
+MAX_FILE_SIZE=10485760
+UPLOAD_PATH=/app/uploads
+ALLOWED_FILE_TYPES=image/jpeg,image/png,image/gif,image/webp
+
 # Rate Limiting
 RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX_REQUESTS=1000
