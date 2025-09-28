@@ -280,6 +280,7 @@ docker-compose -f docker-compose.prod.yml up -d
 ```
 
 #### Option 3: Cloud Deployment
+- **Vercel + Render** (Recommended for free hosting): See [DEPLOYMENT_VERCEL_RENDER.md](DEPLOYMENT_VERCEL_RENDER.md)
 - **DigitalOcean**: See [DEPLOYMENT_CLOUD.md](DEPLOYMENT_CLOUD.md)
 - **AWS**: See [DEPLOYMENT_CLOUD.md](DEPLOYMENT_CLOUD.md)
 - **Google Cloud**: See [DEPLOYMENT_CLOUD.md](DEPLOYMENT_CLOUD.md)
