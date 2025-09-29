@@ -12,7 +12,9 @@ class AuthService {
       const { access_token, user } = response.data;
       
       // Store token
-      localStorage.setItem('token', access_token);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', access_token);
+      }
       
       return { success: true, user, access_token };
     } catch (error) {
@@ -31,7 +33,9 @@ class AuthService {
       const { access_token, user } = response.data;
       
       // Store token
-      localStorage.setItem('token', access_token);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', access_token);
+      }
       
       return { success: true, user, access_token };
     } catch (error) {
@@ -49,7 +53,9 @@ class AuthService {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      localStorage.removeItem('token');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+      }
     }
   }
 
@@ -91,7 +97,9 @@ class AuthService {
       });
       
       const { access_token, refresh_token } = response.data;
-      localStorage.setItem('token', access_token);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', access_token);
+      }
       
       return { success: true, access_token, refresh_token };
     } catch (error) {

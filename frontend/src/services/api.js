@@ -12,15 +12,18 @@ const apiClient = axios.create(API_CONFIG);
 // Request interceptor
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[API] Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url} (token included)`);
-      }
-    } else {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[API] Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url} (no token)`);
+    // Check if we're in browser environment
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`[API] Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url} (token included)`);
+        }
+      } else {
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`[API] Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url} (no token)`);
+        }
       }
     }
     

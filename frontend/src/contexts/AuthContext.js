@@ -18,10 +18,14 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Simplified and more robust initial loading logic
-    const token = localStorage.getItem("token");
-    if (token) {
-      fetchUser();
+    // Check if we're in browser environment
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem("token");
+      if (token) {
+        fetchUser();
+      } else {
+        setLoading(false);
+      }
     } else {
       setLoading(false);
     }
