@@ -52,7 +52,13 @@ router.get("/:id", validationRules.uuidParam("id"), validateRequest, async (req,
       })
     }
 
-    res.json(data)
+    // Transform the data to match frontend expectations
+    const transformedData = {
+      ...data,
+      author_name: data.users?.full_name || 'Unknown Author'
+    }
+    
+    res.json(transformedData)
   } catch (error) {
     console.error("Article fetch error:", error)
     res.status(500).json({
