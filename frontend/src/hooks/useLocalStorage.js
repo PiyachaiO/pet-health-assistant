@@ -37,18 +37,20 @@ export const useLocalStorage = (key, initialValue) => {
 
   // Listen for changes in other tabs/windows
   useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === key && e.newValue !== null) {
-        try {
-          setStoredValue(JSON.parse(e.newValue));
-        } catch (error) {
-          console.error(`Error parsing localStorage value for key "${key}":`, error);
+    if (typeof window !== 'undefined') {
+      const handleStorageChange = (e) => {
+        if (e.key === key && e.newValue !== null) {
+          try {
+            setStoredValue(JSON.parse(e.newValue));
+          } catch (error) {
+            console.error(`Error parsing localStorage value for key "${key}":`, error);
+          }
         }
-      }
-    };
+      };
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+      window.addEventListener('storage', handleStorageChange);
+      return () => window.removeEventListener('storage', handleStorageChange);
+    }
   }, [key]);
 
   return [storedValue, setValue, removeValue];

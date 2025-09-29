@@ -20,11 +20,13 @@ const BookAppointmentModal = ({ onClose, onAppointmentBooked }) => {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    console.log("BookAppointmentModal mounted, checking token...");
-    const token = localStorage.getItem('token');
-    console.log("Token exists:", !!token);
-    if (token) {
-      console.log("Token length:", token.length);
+    if (typeof window !== 'undefined') {
+      console.log("BookAppointmentModal mounted, checking token...");
+      const token = localStorage.getItem('token');
+      console.log("Token exists:", !!token);
+      if (token) {
+        console.log("Token length:", token.length);
+      }
     }
     fetchData()
   }, [])

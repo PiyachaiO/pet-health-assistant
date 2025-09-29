@@ -113,28 +113,35 @@ export const omit = (obj, keys) => {
 
 // Local storage helpers
 export const setStorageItem = (key, value) => {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (error) {
-    console.error('Error setting localStorage item:', error);
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.error('Error setting localStorage item:', error);
+    }
   }
 };
 
 export const getStorageItem = (key, defaultValue = null) => {
-  try {
-    const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : defaultValue;
-  } catch (error) {
-    console.error('Error getting localStorage item:', error);
-    return defaultValue;
+  if (typeof window !== 'undefined') {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : defaultValue;
+    } catch (error) {
+      console.error('Error getting localStorage item:', error);
+      return defaultValue;
+    }
   }
+  return defaultValue;
 };
 
 export const removeStorageItem = (key) => {
-  try {
-    localStorage.removeItem(key);
-  } catch (error) {
-    console.error('Error removing localStorage item:', error);
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.error('Error removing localStorage item:', error);
+    }
   }
 };
 
