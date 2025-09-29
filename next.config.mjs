@@ -4,7 +4,9 @@ const nextConfig = {
   trailingSlash: true,
   images: {
     unoptimized: true
-  }
+  },
+  // Ensure static export works properly
+  distDir: 'out'
 }
 
 export default nextConfig
