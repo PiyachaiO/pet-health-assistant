@@ -1,12 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  // Remove static export to use standard Next.js build
   trailingSlash: true,
   images: {
     unoptimized: true
-  },
-  // Ensure static export works properly
-  distDir: 'out'
+  }
 }
 
 export default nextConfig

@@ -1,7 +1,6 @@
 "use client"
 
 import dynamic from 'next/dynamic'
-import ClientOnly from '../components/ClientOnly'
 
 // Dynamically import the App component to avoid SSR issues
 const App = dynamic(() => import("../frontend/src/App"), {
@@ -14,13 +13,5 @@ const App = dynamic(() => import("../frontend/src/App"), {
 })
 
 export default function SyntheticV0PageForDeployment() {
-  return (
-    <ClientOnly fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500"></div>
-      </div>
-    }>
-      <App />
-    </ClientOnly>
-  )
+  return <App />
 }
