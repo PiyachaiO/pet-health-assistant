@@ -80,8 +80,8 @@ const Users = () => {
             {/* Search */}
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
+        <input
+          type="text"
                 placeholder="ค้นหาผู้ใช้..."
                 className="form-input pl-10 w-full"
                 value={searchTerm}
@@ -148,8 +148,8 @@ const Users = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     การจัดการ
                   </th>
-                </tr>
-              </thead>
+            </tr>
+          </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredUsers.map((userItem) => (
                   <tr key={userItem.id}>
@@ -205,15 +205,15 @@ const Users = () => {
                             >
                               <UserCheck className="h-4 w-4" />
                               <span>เปิดใช้</span>
-                            </button>
+                  </button>
                           )}
                         </div>
                       )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
           </div>
 
           {/* Empty State */}

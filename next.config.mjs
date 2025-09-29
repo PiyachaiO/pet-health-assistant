@@ -1,14 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  output: 'export',
+  trailingSlash: true,
   images: {
-    unoptimized: true,
+    unoptimized: true
   },
+  // Disable server-side rendering for the entire app
+  experimental: {
+    esmExternals: false
+  }
 }
 
 export default nextConfig

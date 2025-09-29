@@ -234,8 +234,8 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">แดชบอร์ดผู้ดูแลระบบ</h1>
-              <p className="text-gray-600 mt-2">สวัสดี, {user.full_name}</p>
+          <h1 className="text-3xl font-bold text-gray-900">แดชบอร์ดผู้ดูแลระบบ</h1>
+          <p className="text-gray-600 mt-2">สวัสดี, {user.full_name}</p>
             </div>
           </div>
         </div>
@@ -375,14 +375,14 @@ const AdminDashboard = () => {
               <div className="flex items-end space-x-4 h-64">
                 {stats?.user_growth ? (
                   stats.user_growth.map((data, index) => (
-                    <div key={index} className="flex flex-col items-center flex-1">
-                      <div
-                        className="bg-green-500 rounded-t-md w-full transition-all duration-500"
-                        style={{ height: `${(data.users / 100) * 200}px` }}
-                      ></div>
-                      <div className="mt-2 text-sm text-gray-600">{data.month}</div>
-                      <div className="text-sm font-medium text-gray-900">{data.users}</div>
-                    </div>
+                  <div key={index} className="flex flex-col items-center flex-1">
+                    <div
+                      className="bg-green-500 rounded-t-md w-full transition-all duration-500"
+                      style={{ height: `${(data.users / 100) * 200}px` }}
+                    ></div>
+                    <div className="mt-2 text-sm text-gray-600">{data.month}</div>
+                    <div className="text-sm font-medium text-gray-900">{data.users}</div>
+                  </div>
                   ))
                 ) : (
                   <div className="flex items-center justify-center h-full w-full text-gray-500">
@@ -612,7 +612,7 @@ const AdminDashboard = () => {
         {activeTab === "users" && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">จัดการผู้ใช้งาน</h2>
+            <h2 className="text-2xl font-bold text-gray-900">จัดการผู้ใช้งาน</h2>
               <button
                 onClick={async () => {
                   try {
@@ -684,9 +684,9 @@ const AdminDashboard = () => {
                                 <Users className="h-5 w-5 text-gray-400" />
                               </div>
                             </div>
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">{user.full_name}</div>
-                              <div className="text-sm text-gray-500">{user.email}</div>
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{user.full_name}</div>
+                            <div className="text-sm text-gray-500">{user.email}</div>
                             </div>
                           </div>
                         </td>
@@ -770,10 +770,10 @@ const AdminDashboard = () => {
               <div className="mb-4">
                 <h3 className="font-medium text-gray-900 mb-2">รายละเอียด:</h3>
                 {selectedApproval.type === "appointment" ? (
-                <div className="text-sm text-gray-600 space-y-1">
-                  <p>
-                    <strong>ประเภท:</strong> {getAppointmentTypeText(selectedApproval.appointment_type)}
-                  </p>
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <p>
+                      <strong>ประเภท:</strong> {getAppointmentTypeText(selectedApproval.appointment_type)}
+                    </p>
                   <div className="flex items-center space-x-2">
                     <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
                       <svg className="h-3 w-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -782,16 +782,16 @@ const AdminDashboard = () => {
                     </div>
                     <p><strong>เจ้าของ:</strong> {selectedApproval.owner_name}</p>
                   </div>
-                  <p>
-                    <strong>สัตว์เลี้ยง:</strong> {selectedApproval.pet_name}
-                  </p>
-                  <p>
-                    <strong>สัตวแพทย์:</strong> {selectedApproval.veterinarian_name}
-                  </p>
-                  <p>
-                    <strong>วันที่:</strong> {formatDateTime(selectedApproval.appointment_date)}
-                  </p>
-                </div>
+                    <p>
+                      <strong>สัตว์เลี้ยง:</strong> {selectedApproval.pet_name}
+                    </p>
+                    <p>
+                      <strong>สัตวแพทย์:</strong> {selectedApproval.veterinarian_name}
+                    </p>
+                    <p>
+                      <strong>วันที่:</strong> {formatDateTime(selectedApproval.appointment_date)}
+                    </p>
+                  </div>
                 ) : (
                   <div className="text-sm text-gray-600 space-y-1">
                     <p>
