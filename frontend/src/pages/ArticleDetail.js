@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
-import axios from "axios"
+import apiClient from "../services/api"
 import { ArrowLeft, User, Clock, Calendar } from "lucide-react"
 
 const ArticleDetail = () => {
@@ -17,7 +17,7 @@ const ArticleDetail = () => {
 
   const fetchArticle = async () => {
     try {
-      const response = await axios.get(`/api/articles/${id}`)
+      const response = await apiClient.get(`/articles/${id}`)
       setArticle(response.data)
     } catch (error) {
       setError("ไม่พบบทความที่ต้องการ")
