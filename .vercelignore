@@ -1,0 +1,6 @@
+backend/
+database/
+*.md
+.git/
+node_modules/
+build/

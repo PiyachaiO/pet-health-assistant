@@ -1,322 +1,191 @@
-# 🐾 Pet Health Assistant
+# 🎨 Pet Health Assistant - Frontend
 
-ระบบจัดการสุขภาพสัตว์เลี้ยงที่ครบครันสำหรับเจ้าของสัตว์เลี้ยง สัตวแพทย์ และผู้ดูแลระบบ
-
-## ✨ Features
-
-### 👤 สำหรับเจ้าของสัตว์เลี้ยง
-- **จัดการข้อมูลสัตว์เลี้ยง** - เพิ่ม แก้ไข ดูข้อมูลสัตว์เลี้ยง พร้อมอัปโหลดรูปภาพ
-- **จองนัดหมาย** - จองนัดหมายกับสัตวแพทย์
-- **ดูประวัติสุขภาพ** - ติดตามประวัติการรักษา
-- **รับคำแนะนำโภชนาการ** - แผนโภชนาการที่เหมาะสม
-- **อ่านบทความ** - ข้อมูลความรู้เกี่ยวกับสัตว์เลี้ยง
-- **จัดการโปรไฟล์** - อัปโหลดรูปโปรไฟล์และข้อมูลส่วนตัว
-- **รับการแจ้งเตือน** - ระบบแจ้งเตือนสำหรับนัดหมายและสุขภาพสัตว์เลี้ยง
-
-### 🩺 สำหรับสัตวแพทย์
-- **จัดการนัดหมาย** - ดูและจัดการนัดหมายทั้งหมด พร้อมอัปเดทสถานะ
-- **ดูข้อมูลผู้ป่วย** - ข้อมูลสัตว์เลี้ยงและเจ้าของ พร้อมรูปภาพ
-- **บันทึกประวัติสุขภาพ** - บันทึกการตรวจและรักษา
-- **สร้างแผนโภชนาการ** - ให้คำแนะนำโภชนาการ
-- **เขียนบทความ** - แชร์ความรู้และประสบการณ์
-- **จัดการโปรไฟล์** - อัปโหลดรูปโปรไฟล์และข้อมูลส่วนตัว
-- **ดูสถิติ** - สถิติการทำงานและผู้ป่วย
-
-### ⚙️ สำหรับผู้ดูแลระบบ
-- **จัดการผู้ใช้** - อนุมัติ/ระงับบัญชีผู้ใช้ พร้อมดูรูปโปรไฟล์
-- **อนุมัติเนื้อหา** - อนุมัติบทความและแผนโภชนาการ
-- **อนุมัติการนัดหมาย** - อนุมัติการนัดหมายที่รอการอนุมัติ
-- **ดูสถิติ** - สถิติการใช้งานระบบและข้อมูลภาพรวม
-- **จัดการข้อมูล** - จัดการข้อมูลทั้งหมดในระบบ
-- **จัดการบทความ** - อนุมัติและจัดการบทความทั้งหมด
-
-## 🛠️ Technology Stack
-
-### Frontend
-- **React 18** - UI Framework
-- **React Router** - Navigation
-- **Tailwind CSS** - Styling
-- **Lucide React** - Icons
-- **Axios** - HTTP Client
-
-### Backend
-- **Node.js** - Runtime
-- **Express.js** - Web Framework
-- **Supabase** - Database & Authentication
-- **JWT** - Authentication
-- **Multer** - File Upload
-- **Sharp** - Image Processing
-- **CORS** - Cross-Origin Resource Sharing
-- **Rate Limiting** - API Protection
-
-### Database
-- **PostgreSQL** (via Supabase)
-- **Row Level Security (RLS)**
-- **Real-time subscriptions**
+React.js frontend application สำหรับระบบจัดการสุขภาพสัตว์เลี้ยง
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Node.js 18+
-- npm หรือ yarn
-- Supabase account
-
-### Installation
-
-1. **Clone repository**
-```bash
-git clone https://github.com/your-username/pet-health-docs.git
-cd pet-health-docs
-```
-
-2. **Install dependencies**
-```bash
-# Backend
-cd backend
+\`\`\`bash
+# Install dependencies
 npm install
 
-# Frontend
-cd ../frontend
-npm install
-```
-
-3. **Environment setup**
-```bash
 # Copy environment file
-cp backend/env.example backend/.env
+cp .env.example .env
 
-# Edit with your Supabase credentials
-# SUPABASE_URL=your_supabase_url
-# SUPABASE_ANON_KEY=your_supabase_anon_key
-# SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-```
-
-4. **Start development servers**
-```bash
-# Backend (Terminal 1)
-cd backend
-npm run dev
-
-# Frontend (Terminal 2)
-cd frontend
+# Start development server
 npm start
-```
 
-5. **Access application**
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
+# Build for production
+npm run build
+\`\`\`
 
-## 📁 Project Structure
+## 📱 Features
 
-```
-pet-health-docs/
-├── backend/                 # Backend API
-│   ├── config/             # Database configuration
-│   ├── middleware/          # Authentication, validation
-│   ├── routes/             # API routes
-│   ├── uploads/            # File uploads
-│   └── server.js           # Main server file
-├── frontend/               # React frontend
-│   ├── public/             # Static files
-│   ├── src/
-│   │   ├── components/     # Reusable components
-│   │   ├── contexts/       # React contexts
-│   │   ├── hooks/          # Custom hooks
-│   │   ├── pages/          # Page components
-│   │   ├── services/       # API services
-│   │   └── utils/          # Utility functions
-│   └── package.json
-├── database/               # Database schemas
-├── docs/                   # Documentation
-└── README.md
-```
+### 👥 User Features
+- ✅ User registration and authentication
+- 🐾 Pet profile management
+- 📋 Health records tracking
+- 💉 Vaccination reminders
+- 📅 Appointment booking
+- 🍖 Nutrition recommendations
+- 📚 Educational articles
 
-## 🔧 Development
+### 👨‍⚕️ Veterinarian Features
+- 📊 Dashboard with statistics
+- 📅 Appointment management
+- 💊 Nutrition guideline creation
+- 👥 Patient management
 
-### Backend Development
-```bash
-cd backend
-npm run dev          # Start with nodemon
-npm test            # Run tests
-npm run db:migrate  # Run database migrations
-```
+### 👨‍💼 Admin Features
+- ✅ Approval system
+- 👥 User management
+- 📈 System statistics
 
-### Frontend Development
-```bash
-cd frontend
-npm start           # Start development server
-npm run build       # Build for production
-npm test           # Run tests
-```
+## 🏗️ Project Structure
 
-## 🐳 Docker Deployment
+\`\`\`
+src/
+├── components/          # Reusable components
+│   ├── AddPetModal.js
+│   ├── AddHealthRecordModal.js
+│   ├── BookAppointmentModal.js
+│   ├── AddNutritionModal.js
+│   ├── ImageUpload.js
+│   ├── Navbar.js
+│   └── ProtectedRoute.js
+├── contexts/            # React contexts
+│   └── AuthContext.js
+├── hooks/               # Custom hooks
+│   ├── useApi.js
+│   ├── useLocalStorage.js
+│   └── index.js
+├── pages/              # Page components
+│   ├── Home.js
+│   ├── Login.js
+│   ├── Register.js
+│   ├── Dashboard.js
+│   ├── PetProfile.js
+│   ├── Appointments.js
+│   ├── VetDashboard.js
+│   ├── AdminDashboard.js
+│   ├── Articles.js
+│   ├── ArticleDetail.js
+│   ├── Notifications.js
+│   └── NutritionRecommendation.js
+├── services/           # API services
+│   ├── api.js
+│   ├── authService.js
+│   ├── petService.js
+│   ├── appointmentService.js
+│   ├── articleService.js
+│   ├── notificationService.js
+│   ├── nutritionService.js
+│   ├── uploadService.js
+│   ├── adminService.js
+│   └── index.js
+├── utils/              # Utility functions
+│   ├── constants.js
+│   └── helpers.js
+├── App.js              # Main app component
+├── index.js            # Entry point
+└── index.css           # Global styles
+\`\`\`
 
-### Development
-```bash
-docker-compose up -d
-```
+## 🎨 Styling
 
-### Production
-```bash
-docker-compose -f docker-compose.prod.yml up -d
-```
+- **Tailwind CSS** - Utility-first CSS framework
+- **Custom CSS classes** - For common components
+- **Responsive design** - Mobile-first approach
+- **Thai fonts** - Inter + Noto Sans Thai
 
-## 📊 Database Schema
+## 🔧 Environment Variables
 
-### Core Tables
-- **users** - ผู้ใช้ (เจ้าของ, สัตวแพทย์, แอดมิน)
-- **pets** - ข้อมูลสัตว์เลี้ยง
-- **appointments** - การนัดหมาย
-- **health_records** - ประวัติสุขภาพ
-- **nutrition_guidelines** - แนวทางโภชนาการ
-- **articles** - บทความ
-- **notifications** - การแจ้งเตือน
+\`\`\`env
+# API Configuration
+REACT_APP_API_URL=http://localhost:5000/api
 
-## 🔐 Security Features
+# Supabase Configuration (if using Supabase)
+REACT_APP_SUPABASE_URL=your_supabase_url
+REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-- **JWT Authentication** - Secure token-based auth
-- **Row Level Security** - Database-level security
-- **Role-based Access** - User permission system
-- **File Upload Security** - Secure file handling with validation
-- **Rate Limiting** - API abuse prevention
-- **Input Validation** - XSS and injection prevention
-- **CORS Protection** - Cross-origin request security
-- **Image Processing** - Safe image resizing and optimization
+# App Configuration
+REACT_APP_NAME=Pet Health Assistant
+REACT_APP_VERSION=1.0.0
 
-## 🖼️ Image Upload System
+# Development Configuration
+REACT_APP_DEBUG=true
+REACT_APP_LOG_LEVEL=info
+\`\`\`
 
-### Features
-- **Pet Images** - Upload and display pet photos
-- **Profile Pictures** - User profile image management
-- **Article Images** - Featured images for articles
-- **Base64 Encoding** - Secure image display
-- **Image Optimization** - Automatic resizing with Sharp
-- **Error Handling** - Fallback icons for missing images
-- **CORS Support** - Cross-origin image serving
+## 📦 Dependencies
 
-## 🔌 API Endpoints
+### Core
+- `react` - UI library
+- `react-dom` - DOM rendering
+- `react-router-dom` - Client-side routing
 
-### Authentication
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `GET /api/auth/profile` - Get user profile
+### HTTP & State
+- `axios` - HTTP client
+- `@supabase/supabase-js` - Supabase client
 
-### Pets Management
-- `GET /api/pets` - Get user's pets
-- `POST /api/pets` - Create new pet
-- `PUT /api/pets/:id` - Update pet information
-- `GET /api/pets/:id` - Get pet details
+### UI & Icons
+- `lucide-react` - Icon library
+- `tailwindcss` - CSS framework
 
-### Appointments
-- `GET /api/appointments` - Get appointments
-- `POST /api/appointments` - Create appointment
-- `PUT /api/appointments/:id/status` - Update appointment status
+## 🧪 Testing
 
-### File Upload
-- `POST /api/upload` - Upload single file
-- `POST /api/upload/multiple` - Upload multiple files
-- `GET /api/upload/image/:filename` - Serve images
+\`\`\`bash
+# Run tests
+npm test
 
-### Admin
-- `GET /api/admin/statistics` - Get system statistics
-- `GET /api/admin/users` - Get all users
-- `PATCH /api/admin/users/:id/status` - Update user status
-
-## 📱 User Roles
-
-### 👤 User (เจ้าของสัตว์เลี้ยง)
-- จัดการข้อมูลสัตว์เลี้ยง
-- จองนัดหมาย
-- ดูประวัติสุขภาพ
-- รับคำแนะนำโภชนาการ
-- อัปโหลดรูปภาพสัตว์เลี้ยง
-- จัดการโปรไฟล์ส่วนตัว
-
-### 🩺 Veterinarian (สัตวแพทย์)
-- ดูและจัดการนัดหมาย
-- บันทึกประวัติสุขภาพ
-- สร้างแผนโภชนาการ
-- เขียนบทความ
-- ดูข้อมูลผู้ป่วย
-- อัปโหลดรูปโปรไฟล์
-
-### ⚙️ Admin (ผู้ดูแลระบบ)
-- จัดการผู้ใช้ทั้งหมด
-- อนุมัติเนื้อหา
-- ดูสถิติระบบ
-- จัดการข้อมูลทั้งหมด
-- อนุมัติการนัดหมาย
+# Run tests with coverage
+npm test -- --coverage
+\`\`\`
 
 ## 🚀 Deployment
 
-### Development Setup
-```bash
-# Clone repository
-git clone https://github.com/your-username/pet-health-docs.git
-cd pet-health-docs
+### Build for Production
+\`\`\`bash
+npm run build
+\`\`\`
 
-# Install dependencies
-cd backend && npm install
-cd ../frontend && npm install
+### Deploy to Vercel
+1. Connect GitHub repository
+2. Set environment variables
+3. Deploy automatically
 
-# Start development servers
-cd backend && npm run dev
-cd frontend && npm start
-```
+### Deploy to Netlify
+1. Connect GitHub repository
+2. Build command: `npm run build`
+3. Publish directory: `build`
+4. Set environment variables
+\`\`\`
 
-### Production Deployment
+ตอนนี้โปรเจคได้ถูกจัดระเบียบแยกเป็น 2 โฟลเดอร์ที่ชัดเจนแล้ว และเปลี่ยนไปใช้ Supabase เรียบร้อย! 
 
-#### Option 1: Quick Deployment
-```bash
-# Automated deployment script
-chmod +x scripts/production-deploy.sh
-./scripts/production-deploy.sh
-```
+## 📁 โครงสร้างโปรเจคใหม่:
 
-#### Option 2: Manual Deployment
-```bash
-# Use Docker Compose for production
-docker-compose -f docker-compose.prod.yml up -d
-```
+\`\`\`
+pet-health-assistant/
+├── 📁 backend/                 # Backend API (Express.js + Supabase)
+├── 📁 frontend/               # Frontend App (React.js)
+├── 📁 database/               # Database Schema & Seed
+├── 📄 README.md               # คู่มือหลัก
+└── 📄 SUPABASE_SETUP.md       # คู่มือตั้งค่า Supabase
+\`\`\`
 
-#### Option 3: Cloud Deployment
-- **Vercel + Render** (Recommended for free hosting): See [DEPLOYMENT_VERCEL_RENDER.md](DEPLOYMENT_VERCEL_RENDER.md)
-- **DigitalOcean**: See [DEPLOYMENT_CLOUD.md](DEPLOYMENT_CLOUD.md)
-- **AWS**: See [DEPLOYMENT_CLOUD.md](DEPLOYMENT_CLOUD.md)
-- **Google Cloud**: See [DEPLOYMENT_CLOUD.md](DEPLOYMENT_CLOUD.md)
+## 🎯 ข้อดีของการแยกโฟลเดอร์:
 
-### Monitoring & Logging
-- **Error Tracking**: Sentry integration
-- **Uptime Monitoring**: UptimeRobot, Pingdom
-- **Logging**: Logtail, structured logging
-- **Performance**: Custom monitoring setup
+1. **แยกความรับผิดชอบชัดเจน** - Frontend/Backend แยกกัน
+2. **Deploy แยกกัน** - สามารถ deploy แต่ละส่วนแยกกัน
+3. **จัดการ dependencies** - แต่ละโฟลเดอร์มี package.json ของตัวเอง
+4. **ทีมงานแยกกัน** - Frontend/Backend developer ทำงานแยกกัน
+5. **Scaling** - ขยายแต่ละส่วนได้อิสระ
 
-See [MONITORING_SETUP.md](MONITORING_SETUP.md) for detailed setup.
+## 🚀 วิธีการใช้งาน:
 
-## 📋 Production Checklist
+1. **Clone repository**
+2. **ตั้งค่า Supabase** ตาม `SUPABASE_SETUP.md`
+3. **รัน Backend**: `cd backend && npm install && npm run dev`
+4. **รัน Frontend**: `cd frontend && npm install && npm start`
 
-ดูรายการตรวจสอบที่ [PRODUCTION_CHECKLIST.md](./PRODUCTION_CHECKLIST.md)
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 📞 Support
-
-หากพบปัญหาหรือต้องการความช่วยเหลือ:
-- สร้าง Issue ใน GitHub repository
-- ติดต่อทีมพัฒนา
-
-## 🙏 Acknowledgments
-
-- Supabase สำหรับ database และ authentication
-- React community สำหรับ UI components
-- Tailwind CSS สำหรับ styling framework
+ระบบพร้อมใช้งานแล้ว! 🎉
