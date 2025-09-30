@@ -44,7 +44,7 @@ const ImageUpload = ({ onImageUploaded, currentImage, className = "" }) => {
         })
 
         // Use base64 data for display, but store server URL for database
-        const serverUrl = `http://localhost:5000/api/upload/image/${response.data.file.filename}`
+        const serverUrl = `${process.env.REACT_APP_API_URL}/api/upload/image/${response.data.file.filename}`
         onImageUploaded(serverUrl)
       }
       reader.readAsDataURL(file)

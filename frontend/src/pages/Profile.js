@@ -33,7 +33,7 @@ const Profile = () => {
           // For existing images, try to fetch and convert to base64
           if (user.profile_picture_url.startsWith('/uploads/') || user.profile_picture_url.startsWith('http://localhost:5000/api/upload/image/')) {
             const filename = user.profile_picture_url.includes('/') ? user.profile_picture_url.split('/').pop() : user.profile_picture_url
-            fetch(`http://localhost:5000/api/upload/image/${filename}`)
+            fetch(`${process.env.REACT_APP_API_URL}/upload/image/${filename}`)
               .then(response => {
                 if (response.ok) {
                   return response.blob()

@@ -46,7 +46,7 @@ const AdminDashboard = () => {
       if (user.profile_picture_url && !user.profile_picture_url.startsWith('data:')) {
         try {
           const filename = user.profile_picture_url.includes('/') ? user.profile_picture_url.split('/').pop() : user.profile_picture_url
-          const response = await fetch(`http://localhost:5000/api/upload/image/${filename}`, {
+          const response = await fetch(`${process.env.REACT_APP_API_URL}/upload/image/${filename}`, {
             mode: 'cors',
             credentials: 'omit'
           })

@@ -42,7 +42,7 @@ const Dashboard = () => {
               // For existing images, try to fetch and convert to base64
               if (pet.photo_url.startsWith('/uploads/') || pet.photo_url.startsWith('http://localhost:5000/api/upload/image/')) {
                 const filename = pet.photo_url.includes('/') ? pet.photo_url.split('/').pop() : pet.photo_url
-                const response = await fetch(`http://localhost:5000/api/upload/image/${filename}`)
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/upload/image/${filename}`)
                 if (response.ok) {
                   const blob = await response.blob()
                   const reader = new FileReader()

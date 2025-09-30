@@ -39,7 +39,7 @@ const PetProfile = () => {
           if (photoUrl.startsWith('/uploads/') || photoUrl.startsWith('http://localhost:5000/api/upload/image/')) {
             try {
               const filename = photoUrl.includes('/') ? photoUrl.split('/').pop() : photoUrl
-              const response = await fetch(`http://localhost:5000/api/upload/image/${filename}`)
+              const response = await fetch(`${process.env.REACT_APP_API_URL}/upload/image/${filename}`)
               if (response.ok) {
                 const blob = await response.blob()
                 const reader = new FileReader()
