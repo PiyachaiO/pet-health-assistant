@@ -126,36 +126,81 @@ const EditPetProfile = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-8">แก้ไขข้อมูล {pet?.name}</h1>
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">{error}</div>}
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Name */}
               <div>
                 <label htmlFor="name" className="form-label">ชื่อ</label>
-                <input id="name" name="name" type="text" value={formData.name} onChange={handleChange} className="form-input" required />
+                <input 
+                  id="name" 
+                  name="name" 
+                  type="text" 
+                  value={formData.name} 
+                  onChange={handleChange} 
+                  className="form-input" 
+                  required 
+                />
               </div>
 
               {/* Species */}
               <div>
                 <label htmlFor="species" className="form-label">ชนิด</label>
-                <input id="species" name="species" type="text" value={formData.species} onChange={handleChange} className="form-input" required />
+                <select 
+                  id="species" 
+                  name="species" 
+                  value={formData.species} 
+                  onChange={handleChange} 
+                  className="form-select"
+                  required
+                >
+                  <option value="">เลือกชนิดสัตว์</option>
+                  <option value="หมา">หมา</option>
+                  <option value="แมว">แมว</option>
+                  <option value="กระต่าย">กระต่าย</option>
+                  <option value="นก">นก</option>
+                  <option value="ปลา">ปลา</option>
+                  <option value="แฮมสเตอร์">แฮมสเตอร์</option>
+                  <option value="กิ้งก่า">กิ้งก่า</option>
+                  <option value="เต่า">เต่า</option>
+                  <option value="อื่นๆ">อื่นๆ</option>
+                </select>
               </div>
 
               {/* Breed */}
               <div>
                 <label htmlFor="breed" className="form-label">สายพันธุ์</label>
-                <input id="breed" name="breed" type="text" value={formData.breed} onChange={handleChange} className="form-input" />
+                <input 
+                  id="breed" 
+                  name="breed" 
+                  type="text" 
+                  value={formData.breed} 
+                  onChange={handleChange} 
+                  className="form-input" 
+                />
               </div>
 
               {/* Birth Date */}
               <div>
                 <label htmlFor="birth_date" className="form-label">วันเกิด</label>
-                <input id="birth_date" name="birth_date" type="date" value={formData.birth_date} onChange={handleChange} className="form-input" />
+                <input 
+                  id="birth_date" 
+                  name="birth_date" 
+                  type="date" 
+                  value={formData.birth_date} 
+                  onChange={handleChange} 
+                  className="form-input" 
+                />
               </div>
 
               {/* Gender */}
               <div>
                 <label htmlFor="gender" className="form-label">เพศ</label>
-                <select id="gender" name="gender" value={formData.gender} onChange={handleChange} className="form-select">
+                <select 
+                  id="gender" 
+                  name="gender" 
+                  value={formData.gender} 
+                  onChange={handleChange} 
+                  className="form-select"
+                >
                   <option value="">ไม่ระบุ</option>
                   <option value="male">ผู้</option>
                   <option value="female">เมีย</option>
@@ -165,13 +210,28 @@ const EditPetProfile = () => {
               {/* Weight */}
               <div>
                 <label htmlFor="weight" className="form-label">น้ำหนัก (กก.)</label>
-                <input id="weight" name="weight" type="number" step="0.1" value={formData.weight} onChange={handleChange} className="form-input" />
+                <input 
+                  id="weight" 
+                  name="weight" 
+                  type="number" 
+                  step="0.1" 
+                  value={formData.weight} 
+                  onChange={handleChange} 
+                  className="form-input" 
+                />
               </div>
 
               {/* Color */}
               <div className="md:col-span-2">
                 <label htmlFor="color" className="form-label">สี</label>
-                <input id="color" name="color" type="text" value={formData.color} onChange={handleChange} className="form-input" />
+                <input 
+                  id="color" 
+                  name="color" 
+                  type="text" 
+                  value={formData.color} 
+                  onChange={handleChange} 
+                  className="form-input" 
+                />
               </div>
             </div>
 
