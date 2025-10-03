@@ -26,7 +26,8 @@ app.use(cors({
     'http://localhost:3000', 
     'http://127.0.0.1:3000',
     'https://frontend-one-ashen-93.vercel.app',
-    'https://frontend-nmwrwmfmm-piyachais-projects.vercel.app'
+    'https://frontend-nmwrwmfmm-piyachais-projects.vercel.app',
+    'https://pet-health-assistant-one.vercel.app'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -42,7 +43,8 @@ app.use((req, res, next) => {
     'http://localhost:3000',
     'http://127.0.0.1:3000',
     'https://frontend-one-ashen-93.vercel.app',
-    'https://frontend-nmwrwmfmm-piyachais-projects.vercel.app'
+    'https://frontend-nmwrwmfmm-piyachais-projects.vercel.app',
+    'https://pet-health-assistant-one.vercel.app'
   ]
   
   const origin = req.headers.origin
