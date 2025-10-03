@@ -5,6 +5,36 @@ const { authenticateToken } = require("../middleware/auth")
 
 const router = express.Router()
 
+// CORS middleware for articles routes
+router.use((req, res, next) => {
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'https://frontend-one-ashen-93.vercel.app',
+    'https://frontend-nmwrwmfmm-piyachais-projects.vercel.app',
+    'https://pet-health-assistant-one.vercel.app'
+  ]
+  
+  const origin = req.headers.origin
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin)
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+  }
+  
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
+  res.setHeader('Access-Control-Allow-Credentials', 'true')
+  res.setHeader('Access-Control-Expose-Headers', 'Content-Type, Content-Length, Authorization')
+  
+  if (req.method === 'OPTIONS') {
+    res.status(200).end()
+    return
+  }
+  
+  next()
+})
+
 // Get all articles (public)
 router.get("/", async (req, res) => {
   try {
