@@ -38,15 +38,21 @@ const PetProfile = () => {
           // For existing images, try to fetch and convert to base64
           if (photoUrl.startsWith('/uploads/') || photoUrl.startsWith('http://localhost:5000/api/upload/image/')) {
             try {
-              const filename = photoUrl.includes('/') ? photoUrl.split('/').pop() : photoUrl
-              const response = await fetch(`${process.env.REACT_APP_API_URL}/upload/image/${filename}`)
-              if (response.ok) {
-                const blob = await response.blob()
-                const reader = new FileReader()
-                reader.onload = (e) => setPetImage(e.target.result)
-                reader.readAsDataURL(blob)
+              // Check if it's a Cloudinary URL (contains cloudinary.com)
+              if (photoUrl.includes('cloudinary.com')) {
+                setPetImage(photoUrl)
               } else {
-                setPetImage(null)
+                // Fallback for old local URLs
+                const filename = photoUrl.includes('/') ? photoUrl.split('/').pop() : photoUrl
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/upload/image/${filename}`)
+                if (response.ok) {
+                  const blob = await response.blob()
+                  const reader = new FileReader()
+                  reader.onload = (e) => setPetImage(e.target.result)
+                  reader.readAsDataURL(blob)
+                } else {
+                  setPetImage(null)
+                }
               }
             } catch (error) {
               console.error('Failed to load existing image:', error)

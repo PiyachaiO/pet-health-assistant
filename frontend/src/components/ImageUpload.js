@@ -33,19 +33,18 @@ const ImageUpload = ({ onImageUploaded, currentImage, className = "" }) => {
         const base64Data = e.target.result
         setPreview(base64Data)
         
-        // Upload to server
+        // Upload to Cloudinary
         const formData = new FormData()
-        formData.append('file', file)
+        formData.append('image', file)
 
-        const response = await apiClient.post('/upload', formData, {
+        const response = await apiClient.post('/cloudinary/image', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         })
 
-        // Use base64 data for display, but store server URL for database
-        const serverUrl = `${process.env.REACT_APP_API_URL}/api/upload/image/${response.data.file.filename}`
-        onImageUploaded(serverUrl)
+        // Use Cloudinary URL for database
+        onImageUploaded(response.data.url)
       }
       reader.readAsDataURL(file)
     } catch (error) {
