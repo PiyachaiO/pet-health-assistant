@@ -44,7 +44,7 @@ const PetProfile = () => {
               } else {
                 // Fallback for old local URLs
                 const filename = photoUrl.includes('/') ? photoUrl.split('/').pop() : photoUrl
-                const response = await fetch(`${process.env.REACT_APP_API_URL}/upload/image/${filename}`)
+                const response = await fetch(`${process.env.REACT_APP_API_URL.replace('/api', '')}/upload/image/${filename}`)
                 if (response.ok) {
                   const blob = await response.blob()
                   const reader = new FileReader()
