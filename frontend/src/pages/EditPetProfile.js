@@ -68,7 +68,14 @@ const EditPetProfile = () => {
     setSaving(true)
     setError(null)
     try {
-      await apiClient.put(`/pets/${id}`, formData)
+      // Convert Thai values to English for backend
+      const submitData = {
+        ...formData,
+        species: convertSpeciesToEnglish(formData.species),
+        gender: convertGenderToEnglish(formData.gender)
+      }
+      
+      await apiClient.put(`/pets/${id}`, submitData)
       navigate(`/pets/${id}`)
     } catch (error) {
       console.error("Failed to update pet profile:", error)
@@ -76,6 +83,32 @@ const EditPetProfile = () => {
     } finally {
       setSaving(false)
     }
+  }
+
+  // Convert Thai species to English
+  const convertSpeciesToEnglish = (thaiSpecies) => {
+    const speciesMap = {
+      'หมา': 'dog',
+      'แมว': 'cat',
+      'นก': 'bird',
+      'กระต่าย': 'rabbit',
+      'ปลา': 'other',
+      'แฮมสเตอร์': 'other',
+      'กิ้งก่า': 'other',
+      'เต่า': 'other',
+      'อื่นๆ': 'other'
+    }
+    return speciesMap[thaiSpecies] || 'other'
+  }
+
+  // Convert Thai gender to English
+  const convertGenderToEnglish = (thaiGender) => {
+    const genderMap = {
+      'ผู้': 'male',
+      'เมีย': 'female',
+      'ไม่ระบุ': 'unknown'
+    }
+    return genderMap[thaiGender] || 'unknown'
   }
 
   if (loading) {
@@ -152,7 +185,7 @@ const EditPetProfile = () => {
                   className="form-select"
                   required
                 >
-                  <option value="">เลือกชนิดสัตว์</option>
+                  <option value="">{formData.species || "เลือกชนิดสัตว์"}</option>
                   <option value="หมา">หมา</option>
                   <option value="แมว">แมว</option>
                   <option value="กระต่าย">กระต่าย</option>
