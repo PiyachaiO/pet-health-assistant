@@ -2,18 +2,35 @@
 
 import { useState, useEffect } from "react"
 import { useAuth } from "../contexts/AuthContext"
+import { useSocket } from "../contexts/SocketContext"
 import apiClient from "../services/api"
-import { Bell, Check, Clock, AlertCircle, Calendar, User, FileText } from "lucide-react"
+import { Bell, Check, Clock, AlertCircle, Calendar, User, FileText, Wifi, WifiOff } from "lucide-react"
 
 const Notifications = () => {
   const { user } = useAuth()
+  const { notifications: socketNotifications, unreadCount, markAsRead: socketMarkAsRead, markAllAsRead, isConnected } = useSocket()
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState("all")
 
+  // Merge Socket.IO notifications with API notifications
   useEffect(() => {
     fetchNotifications()
   }, [])
+
+  // Update notifications when Socket.IO receives new ones
+  useEffect(() => {
+    if (socketNotifications.length > 0) {
+      setNotifications((prev) => {
+        // Merge and deduplicate
+        const merged = [...socketNotifications, ...prev]
+        const unique = merged.filter((notification, index, self) =>
+          index === self.findIndex((n) => n.id === notification.id)
+        )
+        return unique
+      })
+    }
+  }, [socketNotifications])
 
   const fetchNotifications = async () => {
     try {
@@ -30,8 +47,25 @@ const Notifications = () => {
     try {
       await apiClient.patch(`/notifications/${notificationId}/read`)
       setNotifications(notifications.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n)))
+      // Also mark as read in Socket context
+      socketMarkAsRead(notificationId)
     } catch (error) {
       console.error("Failed to mark notification as read:", error)
+    }
+  }
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      // Mark all as read in API
+      const unreadNotifications = notifications.filter(n => !n.is_read)
+      await Promise.all(
+        unreadNotifications.map(n => apiClient.patch(`/notifications/${n.id}/read`))
+      )
+      setNotifications(notifications.map((n) => ({ ...n, is_read: true })))
+      // Also mark all as read in Socket context
+      markAllAsRead()
+    } catch (error) {
+      console.error("Failed to mark all as read:", error)
     }
   }
 
@@ -132,15 +166,52 @@ const Notifications = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            {user?.role === "veterinarian" ? "งานของฉัน" : "การแจ้งเตือน"}
-          </h1>
-          <p className="text-gray-600">
-            {user?.role === "veterinarian" 
-              ? "จัดการงานและติดตามการแจ้งเตือนที่สำคัญ" 
-              : "ติดตามกำหนดการสำคัญของสัตว์เลี้ยงของคุณ"
-            }
-          </p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {user?.role === "veterinarian" ? "งานของฉัน" 
+                 : user?.role === "admin" ? "การจัดการระบบ"
+                 : "การแจ้งเตือน"}
+              </h1>
+              <p className="text-gray-600 mb-3">
+                {user?.role === "veterinarian" 
+                  ? "จัดการงานและติดตามการแจ้งเตือนที่สำคัญ" 
+                  : user?.role === "admin"
+                  ? "ดูแลและอนุมัติเนื้อหาต่างๆ ในระบบ"
+                  : "ติดตามกำหนดการสำคัญของสัตว์เลี้ยงของคุณ"
+                }
+              </p>
+              <div className="flex items-center space-x-2">
+                {isConnected ? (
+                  <>
+                    <Wifi className="h-4 w-4 text-green-500 animate-pulse" />
+                    <span className="text-sm text-green-600 font-medium">เชื่อมต่อแบบ Real-time</span>
+                  </>
+                ) : (
+                  <>
+                    <WifiOff className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-500">ไม่ได้เชื่อมต่อ</span>
+                  </>
+                )}
+              </div>
+            </div>
+            <div className="flex flex-col items-end space-y-2">
+              {unreadCount > 0 && (
+                <div className="bg-red-100 text-red-800 px-4 py-2 rounded-full text-sm font-bold flex items-center space-x-2">
+                  <Bell className="h-4 w-4" />
+                  <span>{unreadCount} การแจ้งเตือนใหม่</span>
+                </div>
+              )}
+              {notifications.filter(n => !n.is_read).length > 0 && (
+                <button
+                  onClick={handleMarkAllAsRead}
+                  className="text-sm text-green-600 hover:text-green-700 font-medium hover:underline"
+                >
+                  ทำเครื่องหมายทั้งหมดว่าอ่านแล้ว
+                </button>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Filter Tabs */}

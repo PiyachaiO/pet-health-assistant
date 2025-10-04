@@ -2,6 +2,12 @@ const express = require("express")
 const { supabase } = require("../config/supabase")
 const { validationRules, validateRequest } = require("../middleware/validation")
 const { authenticateToken } = require("../middleware/auth")
+const {
+  notifyAppointmentStatusChanged,
+  notifyVetNewAppointment,
+  notifyVetAppointmentCancelled,
+  notifyVetAppointmentUpdated
+} = require("../services/notificationService")
 
 const router = express.Router()
 
@@ -180,41 +186,27 @@ router.post("/", validationRules.appointmentCreation, validateRequest, async (re
       })
     }
 
-    // สร้างการแจ้งเตือนอัตโนมัติเมื่อมีการนัดหมายใหม่
+    // สร้างการแจ้งเตือนอัตโนมัติเมื่อมีการนัดหมายใหม่ (พร้อม Real-time Socket.IO)
     try {
-      // สร้างการแจ้งเตือนสำหรับเจ้าของสัตว์เลี้ยง
-      await fetch(`${process.env.BACKEND_URL || 'http://localhost:5000'}/api/notifications/appointment`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          appointment_id: data.id,
-          veterinarian_id: data.veterinarian_id,
-          user_id: data.user_id,
-          pet_id: data.pet_id,
+      // ดึงข้อมูลผู้ใช้สำหรับการแจ้งเตือน
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("id, full_name, email")
+        .eq("id", data.user_id)
+        .single()
+
+      // แจ้งเตือนสัตวแพทย์ผ่าน Socket.IO (Real-time)
+      if (data.veterinarian_id && userData) {
+        await notifyVetNewAppointment(data.veterinarian_id, {
+          id: data.id,
+          user_name: userData.full_name,
+          user_email: userData.email,
           appointment_date: data.appointment_date,
-          appointment_type: data.appointment_type
-        })
-      })
-
-      // สร้างการแจ้งเตือนสำหรับสัตวแพทย์ (ถ้ามี)
-      if (data.veterinarian_id) {
-        const vetNotification = {
-          user_id: data.veterinarian_id,
+          appointment_time: data.appointment_time,
+          appointment_type: data.appointment_type,
           pet_id: data.pet_id,
-          notification_type: "appointment_reminder",
-          title: "นัดหมายใหม่",
-          message: `มีนัดหมายใหม่สำหรับ ${data.appointment_type} ในวันที่ ${new Date(data.appointment_date).toLocaleDateString('th-TH')}`,
-          priority: "high",
-          is_read: false,
-          is_completed: false,
-          due_date: data.appointment_date
-        }
-
-        await supabase
-          .from("notifications")
-          .insert([vetNotification])
+          notes: data.notes
+        })
       }
     } catch (notificationError) {
       console.error("Failed to create notification:", notificationError)
@@ -336,27 +328,38 @@ router.patch("/:id/status", [
       });
     }
 
-    // สร้างการแจ้งเตือนเมื่อมีการอัปเดตสถานะ
+    // สร้างการแจ้งเตือนเมื่อมีการอัปเดตสถานะ (พร้อม Real-time Socket.IO)
     try {
-      const statusText = status === "confirmed" ? "ยืนยันแล้ว" : 
-                        status === "completed" ? "เสร็จสิ้น" : 
-                        status === "cancelled" ? "ยกเลิก" : status;
-      
-      const notificationData = {
-        user_id: data.user_id,
-        pet_id: data.pet_id,
-        notification_type: "appointment_reminder",
-        title: `อัปเดตสถานะนัดหมาย`,
-        message: `นัดหมาย ${data.appointment_type} ของ ${data.pets?.name || 'สัตว์เลี้ยง'} ${statusText} แล้ว`,
-        priority: "medium",
-        is_read: false,
-        is_completed: false,
-        due_date: data.appointment_date
-      };
+      // แจ้งเตือนผู้ใช้ผ่าน Socket.IO
+      await notifyAppointmentStatusChanged(data.user_id, {
+        id: data.id,
+        status: status,
+        appointment_date: data.appointment_date,
+        appointment_time: data.appointment_time,
+        appointment_type: data.appointment_type,
+        pet_name: data.pets?.name || 'สัตว์เลี้ยง',
+        pet_species: data.pets?.species,
+        veterinarian_id: data.veterinarian_id
+      })
 
-      await supabase
-        .from("notifications")
-        .insert([notificationData]);
+      // ถ้าสถานะเป็น cancelled แจ้งเตือนสัตวแพทย์ด้วย
+      if (status === 'cancelled' && data.veterinarian_id) {
+        const { data: userData, error: userError } = await supabase
+          .from("users")
+          .select("id, full_name, email")
+          .eq("id", data.user_id)
+          .single()
+
+        if (userData) {
+          await notifyVetAppointmentCancelled(data.veterinarian_id, {
+            id: data.id,
+            user_name: userData.full_name,
+            appointment_date: data.appointment_date,
+            appointment_type: data.appointment_type,
+            pet_name: data.pets?.name || 'สัตว์เลี้ยง'
+          })
+        }
+      }
     } catch (notificationError) {
       console.error("Failed to create status update notification:", notificationError)
     }

@@ -1,4 +1,5 @@
 const express = require("express")
+const http = require("http")
 const cors = require("cors")
 const helmet = require("helmet")
 const rateLimit = require("express-rate-limit")
@@ -18,8 +19,14 @@ const cloudinaryUploadRoutes = require("./routes/cloudinary-upload")
 const adminRoutes = require("./routes/admin")
 const aiRoutes = require("./routes/ai")
 
+const { initializeSocket, getConnectedCount } = require("./config/socket")
+
 const app = express()
+const server = http.createServer(app)
 const PORT = process.env.PORT || 5000
+
+// Initialize Socket.IO
+initializeSocket(server)
 
 // CORS configuration
 app.use(cors({
@@ -123,11 +130,13 @@ app.use("/api/admin", adminRoutes)
 app.use("/api/ai", aiRoutes)
 
 // Health check endpoint
-app.get("/api/health", (req, res) => {
+app.get("/api/health", async (req, res) => {
+  const connectedClients = await getConnectedCount()
   res.status(200).json({
     status: "OK",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
+    socketConnections: connectedClients,
   })
 })
 
@@ -147,9 +156,10 @@ app.use("*", (req, res) => {
   })
 })
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`)
   console.log(`Environment: ${process.env.NODE_ENV || "development"}`)
+  console.log(`Socket.IO server is ready for connections`)
 })
 
 module.exports = app

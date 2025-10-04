@@ -21,14 +21,16 @@ import ArticleForm from './pages/ArticleForm'; // Import ArticleForm
 import Pets from './pages/Pets'; // Import Pets
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
+import { SocketProvider } from './contexts/SocketContext';
 import Navbar from './components/Navbar';
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Navbar />
-        <div className="container mx-auto mt-4">
+      <SocketProvider>
+        <Router>
+          <Navbar />
+          <div className="container mx-auto mt-4">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -58,12 +60,9 @@ function App() {
           </Routes>
         </div>
       </Router>
+      </SocketProvider>
     </AuthProvider>
   );
 }
 
 export default App;
-<AuthProvider>
-  {/* ...other providers... */}
-  <App />
-</AuthProvider>

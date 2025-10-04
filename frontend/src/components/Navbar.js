@@ -3,10 +3,12 @@
 import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
-import { Menu, X, Home, Calendar, Bell, FileText, Utensils, LogOut, PawPrint, Settings, User } from "lucide-react"
+import { useSocket } from "../contexts/SocketContext"
+import { Menu, X, Home, Calendar, Bell, FileText, Utensils, LogOut, PawPrint, Settings, User, Users, Shield } from "lucide-react"
 
 const Navbar = () => {
   const { user, logout } = useAuth()
+  const { isConnected, unreadCount } = useSocket()
   const location = useLocation()
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -64,30 +66,35 @@ const Navbar = () => {
     ? [
         // Dashboard - different for each role
         { 
-          name: "แดชบอร์ด", 
+          name: user.role === "veterinarian" ? "แดชบอร์ดสัตวแพทย์" 
+               : user.role === "admin" ? "แดชบอร์ดผู้ดูแล" 
+               : "แดชบอร์ด", 
           href: user.role === "veterinarian" ? "/vet-dashboard" 
                : user.role === "admin" ? "/admin" 
                : "/dashboard", 
-          icon: Home 
+          icon: user.role === "veterinarian" ? Users 
+               : user.role === "admin" ? Shield 
+               : Home 
         },
+        
+        // Pets - available for user and vet
+        ...(user.role !== "admin" 
+          ? [{ name: "สัตว์เลี้ยงของฉัน", href: "/pets", icon: PawPrint }]
+          : []
+        ),
         
         // Appointments - available for all authenticated users
         { name: "การนัดหมาย", href: "/appointments", icon: Calendar },
         
-        // Role-specific navigation
-        ...(user.role === "veterinarian" 
-          ? [
-              { name: "สัตว์เลี้ยง", href: "/pets", icon: PawPrint },
-              { name: "งานของฉัน", href: "/notifications", icon: Bell }
-            ]
-          : user.role === "admin"
-          ? [
-              { name: "สัตว์เลี้ยง", href: "/pets", icon: PawPrint }
-            ]
-          : [
-              { name: "การแจ้งเตือน", href: "/notifications", icon: Bell }
-            ]
-        ),
+        // Notifications - with badge for unread count
+        { 
+          name: user.role === "veterinarian" ? "งานของฉัน" 
+               : user.role === "admin" ? "การจัดการ" 
+               : "การแจ้งเตือน", 
+          href: "/notifications", 
+          icon: Bell,
+          badge: unreadCount > 0 ? unreadCount : null
+        },
         
         // Nutrition - available for all authenticated users
         { name: "คำแนะนำโภชนาการ", href: "/nutrition", icon: Utensils },
@@ -130,7 +137,7 @@ const Navbar = () => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors relative ${
                     location.pathname === item.href
                       ? "text-green-600 bg-green-50"
                       : "text-gray-700 hover:text-green-600 hover:bg-green-50"
@@ -138,6 +145,11 @@ const Navbar = () => {
                 >
                   <item.icon className="h-4 w-4" />
                   <span>{item.name}</span>
+                  {item.badge && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                      {item.badge > 99 ? '99+' : item.badge}
+                    </span>
+                  )}
                 </Link>
               ))}
           </div>
@@ -146,6 +158,12 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-4">
+                {/* Socket.IO Connection Status */}
+                <div className="flex items-center space-x-2 px-2 py-1 rounded-full bg-gray-100" title={isConnected ? 'เชื่อมต่อแล้ว' : 'ไม่ได้เชื่อมต่อ'}>
+                  <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+                  <span className="text-xs text-gray-600">{isConnected ? 'Online' : 'Offline'}</span>
+                </div>
+                
                 <Link
                   to="/profile"
                   className="flex items-center space-x-2 text-gray-700 hover:text-green-600 transition-colors"
@@ -166,7 +184,14 @@ const Navbar = () => {
                       <User className="h-4 w-4 text-gray-400" />
                     </div>
                   </div>
-                  <span className="text-sm font-medium">{user.full_name}</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">{user.full_name}</span>
+                    <span className="text-xs text-gray-500">
+                      {user.role === "veterinarian" ? "สัตวแพทย์" 
+                       : user.role === "admin" ? "ผู้ดูแลระบบ" 
+                       : "ผู้ใช้งาน"}
+                    </span>
+                  </div>
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -226,7 +251,7 @@ const Navbar = () => {
                   key={item.name}
                   to={item.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium ${
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium relative ${
                     location.pathname === item.href
                       ? "text-green-600 bg-green-50"
                       : "text-gray-700 hover:text-green-600 hover:bg-green-50"
@@ -234,15 +259,30 @@ const Navbar = () => {
                 >
                   <item.icon className="h-5 w-5" />
                   <span>{item.name}</span>
+                  {item.badge && (
+                    <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center ml-auto">
+                      {item.badge > 99 ? '99+' : item.badge}
+                    </span>
+                  )}
                 </Link>
               ))}
 
             <div className="border-t border-gray-200 pt-4">
               {user ? (
                 <div className="space-y-2">
-                  <div className="px-3 py-2">
+                  <div className="px-3 py-2 bg-gray-50 rounded-md">
                     <p className="text-sm text-gray-500">สวัสดี,</p>
                     <p className="text-base font-medium text-gray-900">{user.full_name}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {user.role === "veterinarian" ? "🏥 สัตวแพทย์" 
+                       : user.role === "admin" ? "👨‍💼 ผู้ดูแลระบบ" 
+                       : "👤 ผู้ใช้งาน"}
+                    </p>
+                    {/* Connection Status */}
+                    <div className="flex items-center space-x-2 mt-2">
+                      <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-400'}`} />
+                      <span className="text-xs text-gray-600">{isConnected ? 'เชื่อมต่อแล้ว' : 'ไม่ได้เชื่อมต่อ'}</span>
+                    </div>
                   </div>
                   <button
                     onClick={handleLogout}

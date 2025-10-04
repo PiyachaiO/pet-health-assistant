@@ -1,0 +1,597 @@
+const { emitToUser, emitToRole, emitToAll } = require('../config/socket');
+const supabase = require('../config/supabase');
+
+/**
+ * Notification Service
+ * จัดการการส่งการแจ้งเตือนแบบ real-time และบันทึกลงฐานข้อมูล
+ */
+
+// ==================== USER NOTIFICATIONS ====================
+
+/**
+ * แจ้งเตือนผู้ใช้เมื่อสถานะนัดหมายเปลี่ยน
+ */
+async function notifyAppointmentStatusChanged(userId, appointmentData) {
+  const statusMessages = {
+    confirmed: 'นัดหมายของคุณได้รับการยืนยันแล้ว',
+    cancelled: 'นัดหมายของคุณถูกยกเลิก',
+    completed: 'นัดหมายของคุณเสร็จสิ้นแล้ว'
+  };
+
+  const notification = {
+    user_id: userId,
+    notification_type: 'appointment_reminder',
+    title: 'สถานะนัดหมายเปลี่ยนแปลง',
+    message: statusMessages[appointmentData.status] || 'สถานะนัดหมายของคุณมีการเปลี่ยนแปลง',
+    priority: appointmentData.status === 'cancelled' ? 'high' : 'medium',
+    due_date: appointmentData.appointment_date,
+    is_read: false,
+    is_completed: false
+  };
+
+  // บันทึกลงฐานข้อมูล
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (!error && data) {
+    // ส่งผ่าน Socket.IO
+    emitToUser(userId, 'notification:appointment', {
+      ...data,
+      appointment: appointmentData
+    });
+  }
+
+  return { data, error };
+}
+
+/**
+ * แจ้งเตือนผู้ใช้เมื่อสัตวแพทย์ตอบกลับ
+ */
+async function notifyVetResponded(userId, responseData) {
+  const notification = {
+    user_id: userId,
+    notification_type: 'appointment_reminder',
+    title: 'สัตวแพทย์ตอบกลับแล้ว',
+    message: `สัตวแพทย์ ${responseData.vet_name} ได้ตอบกลับคำถามของคุณแล้ว`,
+    priority: 'medium',
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (!error && data) {
+    emitToUser(userId, 'notification:vet_response', {
+      ...data,
+      response: responseData
+    });
+  }
+
+  return { data, error };
+}
+
+/**
+ * แจ้งเตือนผู้ใช้เมื่อมีแผนโภชนาการใหม่
+ */
+async function notifyNutritionPlanCreated(userId, petId, planData) {
+  const notification = {
+    user_id: userId,
+    pet_id: petId,
+    notification_type: 'nutrition_plan',
+    title: 'แผนโภชนาการใหม่',
+    message: `มีแผนโภชนาการใหม่สำหรับสัตว์เลี้ยงของคุณ: ${planData.pet_name}`,
+    priority: 'medium',
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (!error && data) {
+    emitToUser(userId, 'notification:nutrition_plan', {
+      ...data,
+      plan: planData
+    });
+  }
+
+  return { data, error };
+}
+
+/**
+ * แจ้งเตือนผู้ใช้เมื่อบันทึกสุขภาพถูกอัปเดต
+ */
+async function notifyHealthRecordUpdated(userId, petId, recordData) {
+  const notification = {
+    user_id: userId,
+    pet_id: petId,
+    notification_type: 'health_update',
+    title: 'บันทึกสุขภาพอัปเดต',
+    message: `บันทึกสุขภาพของ ${recordData.pet_name} ถูกอัปเดตแล้ว`,
+    priority: 'low',
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (!error && data) {
+    emitToUser(userId, 'notification:health_record', {
+      ...data,
+      record: recordData
+    });
+  }
+
+  return { data, error };
+}
+
+/**
+ * แจ้งเตือนผู้ใช้เมื่อถึงกำหนดฉีดวัคซีน
+ */
+async function notifyVaccinationReminder(userId, petId, vaccinationData) {
+  const notification = {
+    user_id: userId,
+    pet_id: petId,
+    notification_type: 'vaccination_due',
+    title: 'เตือนฉีดวัคซีน',
+    message: `${vaccinationData.pet_name} ถึงกำหนดฉีดวัคซีนแล้ว`,
+    priority: 'high',
+    due_date: vaccinationData.due_date,
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (!error && data) {
+    emitToUser(userId, 'notification:vaccination', {
+      ...data,
+      vaccination: vaccinationData
+    });
+  }
+
+  return { data, error };
+}
+
+/**
+ * แจ้งเตือนผู้ใช้เมื่อถึงเวลาให้ยา
+ */
+async function notifyMedicationReminder(userId, petId, medicationData) {
+  const notification = {
+    user_id: userId,
+    pet_id: petId,
+    notification_type: 'medication_reminder',
+    title: 'เตือนให้ยา',
+    message: `ถึงเวลาให้ยา ${medicationData.medication_name} สำหรับ ${medicationData.pet_name}`,
+    priority: 'high',
+    due_date: medicationData.due_time,
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (!error && data) {
+    emitToUser(userId, 'notification:medication', {
+      ...data,
+      medication: medicationData
+    });
+  }
+
+  return { data, error };
+}
+
+// ==================== VETERINARIAN NOTIFICATIONS ====================
+
+/**
+ * แจ้งเตือนสัตวแพทย์เมื่อมีนัดหมายใหม่
+ */
+async function notifyVetNewAppointment(vetId, appointmentData) {
+  const notification = {
+    user_id: vetId,
+    notification_type: 'appointment_reminder',
+    title: 'นัดหมายใหม่',
+    message: `คุณมีนัดหมายใหม่จาก ${appointmentData.user_name} วันที่ ${appointmentData.appointment_date}`,
+    priority: 'high',
+    due_date: appointmentData.appointment_date,
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (!error && data) {
+    emitToUser(vetId, 'notification:new_appointment', {
+      ...data,
+      appointment: appointmentData
+    });
+
+    // ส่งไปยังทุกสัตวแพทย์ที่ออนไลน์
+    emitToRole('veterinarian', 'notification:new_appointment_broadcast', {
+      ...data,
+      appointment: appointmentData
+    });
+  }
+
+  return { data, error };
+}
+
+/**
+ * แจ้งเตือนสัตวแพทย์เมื่อนัดหมายถูกยกเลิก
+ */
+async function notifyVetAppointmentCancelled(vetId, appointmentData) {
+  const notification = {
+    user_id: vetId,
+    notification_type: 'appointment_reminder',
+    title: 'นัดหมายถูกยกเลิก',
+    message: `นัดหมายจาก ${appointmentData.user_name} ถูกยกเลิก`,
+    priority: 'medium',
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (!error && data) {
+    emitToUser(vetId, 'notification:appointment_cancelled', {
+      ...data,
+      appointment: appointmentData
+    });
+  }
+
+  return { data, error };
+}
+
+/**
+ * แจ้งเตือนสัตวแพทย์เมื่อนัดหมายถูกแก้ไข
+ */
+async function notifyVetAppointmentUpdated(vetId, appointmentData) {
+  const notification = {
+    user_id: vetId,
+    notification_type: 'appointment_reminder',
+    title: 'นัดหมายถูกแก้ไข',
+    message: `นัดหมายจาก ${appointmentData.user_name} มีการเปลี่ยนแปลง`,
+    priority: 'medium',
+    due_date: appointmentData.appointment_date,
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (!error && data) {
+    emitToUser(vetId, 'notification:appointment_updated', {
+      ...data,
+      appointment: appointmentData
+    });
+  }
+
+  return { data, error };
+}
+
+/**
+ * แจ้งเตือนสัตวแพทย์เมื่อมีการแจ้งเตือนด่วน
+ */
+async function notifyVetUrgent(vetId, urgentData) {
+  const notification = {
+    user_id: vetId,
+    notification_type: 'health_alert',
+    title: 'การแจ้งเตือนด่วน',
+    message: urgentData.message,
+    priority: 'high',
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (!error && data) {
+    emitToUser(vetId, 'notification:urgent', {
+      ...data,
+      urgent: urgentData
+    });
+  }
+
+  return { data, error };
+}
+
+/**
+ * แจ้งเตือนสัตวแพทย์เมื่อบทความได้รับการอนุมัติ
+ */
+async function notifyVetArticlePublished(vetId, articleData) {
+  const notification = {
+    user_id: vetId,
+    notification_type: 'article_published',
+    title: 'บทความได้รับการเผยแพร่',
+    message: `บทความ "${articleData.title}" ของคุณได้รับการอนุมัติและเผยแพร่แล้ว`,
+    priority: 'low',
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (!error && data) {
+    emitToUser(vetId, 'notification:article_published', {
+      ...data,
+      article: articleData
+    });
+  }
+
+  return { data, error };
+}
+
+// ==================== ADMIN NOTIFICATIONS ====================
+
+/**
+ * แจ้งเตือนแอดมินเมื่อมีผู้ใช้ใหม่สมัครสมาชิก
+ */
+async function notifyAdminNewUser(userData) {
+  const notification = {
+    notification_type: 'system_alert',
+    title: 'ผู้ใช้ใหม่สมัครสมาชิก',
+    message: `${userData.full_name} (${userData.email}) เพิ่งสมัครสมาชิก`,
+    priority: 'low',
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (!error && data) {
+    emitToRole('admin', 'notification:new_user', {
+      ...data,
+      user: userData
+    });
+  }
+
+  return { data, error };
+}
+
+/**
+ * แจ้งเตือนแอดมินเมื่อมีสัตวแพทย์สมัคร
+ */
+async function notifyAdminNewVetApplication(vetData) {
+  const notification = {
+    notification_type: 'system_alert',
+    title: 'สัตวแพทย์สมัครใหม่',
+    message: `${vetData.full_name} สมัครเป็นสัตวแพทย์ - รอการอนุมัติ`,
+    priority: 'high',
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (!error && data) {
+    emitToRole('admin', 'notification:new_vet_application', {
+      ...data,
+      vet: vetData
+    });
+  }
+
+  return { data, error };
+}
+
+/**
+ * แจ้งเตือนแอดมินเมื่อมีบทความรอการอนุมัติ
+ */
+async function notifyAdminArticlePending(articleData) {
+  const notification = {
+    notification_type: 'content_approval',
+    title: 'บทความรอการอนุมัติ',
+    message: `บทความ "${articleData.title}" โดย ${articleData.author_name} รอการอนุมัติ`,
+    priority: 'medium',
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (!error && data) {
+    emitToRole('admin', 'notification:article_pending', {
+      ...data,
+      article: articleData
+    });
+  }
+
+  return { data, error };
+}
+
+/**
+ * แจ้งเตือนแอดมินเมื่อมี Nutrition Guideline รอการอนุมัติ
+ */
+async function notifyAdminNutritionPending(guidelineData) {
+  const notification = {
+    notification_type: 'content_approval',
+    title: 'Nutrition Guideline รอการอนุมัติ',
+    message: `คำแนะนำโภชนาการ "${guidelineData.title}" โดย ${guidelineData.vet_name} รอการอนุมัติ`,
+    priority: 'medium',
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (!error && data) {
+    emitToRole('admin', 'notification:nutrition_pending', {
+      ...data,
+      guideline: guidelineData
+    });
+  }
+
+  return { data, error };
+}
+
+/**
+ * แจ้งเตือนแอดมินเมื่อมีการแจ้งเตือนระบบ
+ */
+async function notifyAdminSystemAlert(alertData) {
+  const notification = {
+    notification_type: 'system_alert',
+    title: 'การแจ้งเตือนระบบ',
+    message: alertData.message,
+    priority: alertData.priority || 'high',
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (!error && data) {
+    emitToRole('admin', 'notification:system_alert', {
+      ...data,
+      alert: alertData
+    });
+  }
+
+  return { data, error };
+}
+
+/**
+ * แจ้งเตือนแอดมินเมื่อมีรายงาน/ร้องเรียน
+ */
+async function notifyAdminUserReport(reportData) {
+  const notification = {
+    notification_type: 'system_alert',
+    title: 'รายงาน/ร้องเรียนใหม่',
+    message: `มีรายงานใหม่จาก ${reportData.reporter_name}: ${reportData.subject}`,
+    priority: 'high',
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (!error && data) {
+    emitToRole('admin', 'notification:user_report', {
+      ...data,
+      report: reportData
+    });
+  }
+
+  return { data, error };
+}
+
+// ==================== BROADCAST NOTIFICATIONS ====================
+
+/**
+ * แจ้งเตือนทุกคนเมื่อมีบทความใหม่
+ */
+async function notifyAllNewArticle(articleData) {
+  emitToAll('notification:new_article', {
+    title: 'บทความใหม่',
+    message: `มีบทความใหม่: "${articleData.title}"`,
+    article: articleData,
+    timestamp: new Date().toISOString()
+  });
+}
+
+/**
+ * แจ้งเตือนทุกคนเมื่อมีการประกาศสำคัญ
+ */
+async function notifyAllAnnouncement(announcementData) {
+  emitToAll('notification:announcement', {
+    title: 'ประกาศ',
+    message: announcementData.message,
+    priority: announcementData.priority || 'high',
+    announcement: announcementData,
+    timestamp: new Date().toISOString()
+  });
+}
+
+module.exports = {
+  // User notifications
+  notifyAppointmentStatusChanged,
+  notifyVetResponded,
+  notifyNutritionPlanCreated,
+  notifyHealthRecordUpdated,
+  notifyVaccinationReminder,
+  notifyMedicationReminder,
+
+  // Vet notifications
+  notifyVetNewAppointment,
+  notifyVetAppointmentCancelled,
+  notifyVetAppointmentUpdated,
+  notifyVetUrgent,
+  notifyVetArticlePublished,
+
+  // Admin notifications
+  notifyAdminNewUser,
+  notifyAdminNewVetApplication,
+  notifyAdminArticlePending,
+  notifyAdminNutritionPending,
+  notifyAdminSystemAlert,
+  notifyAdminUserReport,
+
+  // Broadcast notifications
+  notifyAllNewArticle,
+  notifyAllAnnouncement
+};
+
