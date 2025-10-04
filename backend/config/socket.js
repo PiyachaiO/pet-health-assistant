@@ -1,6 +1,5 @@
 const { Server } = require('socket.io');
-const jwt = require('jsonwebtoken');
-const supabase = require('./supabase');
+const { supabase } = require('./supabase');
 
 let io;
 
@@ -36,19 +35,27 @@ function initializeSocket(server) {
         return next(new Error('Authentication error: No token provided'));
       }
 
-      // Verify JWT token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      
-      // Fetch user from database
-      const { data: user, error } = await supabase
+      // Verify token with Supabase Auth (same as REST API middleware)
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
+
+      if (authError || !authUser) {
+        console.error('[Socket.IO] Supabase auth error:', authError?.message || 'User not found');
+        return next(new Error('Authentication error: Invalid or expired token'));
+      }
+
+      // Fetch full user data from database
+      const { data: user, error: dbError } = await supabase
         .from('users')
         .select('id, email, full_name, role')
-        .eq('id', decoded.userId)
+        .eq('id', authUser.id)
         .single();
 
-      if (error || !user) {
-        return next(new Error('Authentication error: Invalid token'));
+      if (dbError || !user) {
+        console.error('[Socket.IO] Database error:', dbError?.message || 'User not found in database');
+        return next(new Error('Authentication error: User not found'));
       }
+
+      console.log('[Socket.IO] User authenticated:', user.email, `(${user.role})`);
 
       // Attach user to socket
       socket.userId = user.id;

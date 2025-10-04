@@ -27,8 +27,17 @@ export const SocketProvider = ({ children }) => {
 
     const token = localStorage.getItem('token');
     if (!token) {
+      console.warn('No token found, cannot connect to Socket.IO');
       return;
     }
+
+    // Validate token format
+    if (!token.includes('.')) {
+      console.error('Invalid token format');
+      return;
+    }
+
+    console.log('Connecting to Socket.IO with token:', token.substring(0, 20) + '...');
 
     // Create Socket.IO connection
     const socketInstance = io(process.env.REACT_APP_API_URL.replace('/api', ''), {
@@ -61,6 +70,15 @@ export const SocketProvider = ({ children }) => {
 
     socketInstance.on('connect_error', (error) => {
       console.error('Socket.IO connection error:', error.message);
+      console.error('Error details:', error);
+      
+      // If authentication error, try to re-login
+      if (error.message.includes('Authentication') || error.message.includes('Invalid token')) {
+        console.warn('Authentication failed. Please login again.');
+        // Optional: You can redirect to login page here
+        // window.location.href = '/login';
+      }
+      
       setIsConnected(false);
     });
 
