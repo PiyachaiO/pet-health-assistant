@@ -404,12 +404,10 @@ const PetProfile = () => {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900">ประวัติสุขภาพ</h2>
-              {user?.role !== 'veterinarian' && (
-                <button onClick={() => setShowAddRecordModal(true)} className="btn-primary flex items-center space-x-2">
-                  <Plus className="h-4 w-4" />
-                  <span>เพิ่มบันทึกใหม่</span>
-                </button>
-              )}
+              <button onClick={() => setShowAddRecordModal(true)} className="btn-primary flex items-center space-x-2">
+                <Plus className="h-4 w-4" />
+                <span>เพิ่มบันทึกใหม่</span>
+              </button>
             </div>
 
             {healthRecords.length === 0 ? (
@@ -422,11 +420,9 @@ const PetProfile = () => {
                     : `เพิ่มบันทึกสุขภาพแรกของ ${pet.name}`
                   }
                 </p>
-                {user?.role !== 'veterinarian' && (
-                  <button onClick={() => setShowAddRecordModal(true)} className="btn-primary">
-                    เพิ่มบันทึกใหม่
-                  </button>
-                )}
+                <button onClick={() => setShowAddRecordModal(true)} className="btn-primary">
+                  เพิ่มบันทึกใหม่
+                </button>
               </div>
             ) : (
               <div className="space-y-4">

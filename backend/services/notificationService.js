@@ -27,6 +27,7 @@ function formatThaiDate(dateString) {
 
 /**
  * แจ้งเตือนผู้ใช้เมื่อ Vet สร้างแผนโภชนาการให้
+ * NOTE: ต้องเพิ่ม 'nutrition_plan_created' ใน notification_type enum ก่อน
  */
 async function notifyNutritionPlanCreated(userId, nutritionData) {
   console.log('[notifyNutritionPlanCreated] Called with userId:', userId, 'nutritionData:', nutritionData);
@@ -34,9 +35,9 @@ async function notifyNutritionPlanCreated(userId, nutritionData) {
   const notification = {
     user_id: userId,
     pet_id: nutritionData.pet_id || null,
-    notification_type: 'appointment_reminder', // ใช้ enum ที่มีอยู่
+    notification_type: 'nutrition_plan_created', // ⚠️ ต้องเพิ่ม enum value ก่อน
     title: 'แผนโภชนาการใหม่',
-    message: `สัตวแพทย์ ${nutritionData.vet_name} ได้สร้างแผนโภชนาการสำหรับ ${nutritionData.pet_name}`,
+    message: `สัตวแพทย์ ${nutritionData.vet_name} ได้สร้างแผนโภชนาการใหม่สำหรับ ${nutritionData.pet_name}`,
     priority: 'medium',
     is_read: false,
     is_completed: false

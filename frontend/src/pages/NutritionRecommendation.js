@@ -5,7 +5,7 @@ import { useParams, Link, useLocation, useNavigate } from "react-router-dom"
 import { petService } from "../services"
 import { useAuth } from "../contexts/AuthContext"
 import { useApi } from "../hooks"
-import { ArrowLeft, Utensils, Edit, Power, Trash2 } from "lucide-react"
+import { ArrowLeft, Utensils, Edit } from "lucide-react"
 import apiClient from "../services/api"
 import VetNutritionForm from "../components/VetNutritionForm"
 
@@ -88,48 +88,6 @@ const NutritionRecommendation = () => {
     fetchVetRecommendations();
   }
 
-  const handleToggleStatus = async (planId) => {
-    try {
-      const response = await apiClient.patch(`/nutrition/recommendations/${planId}/toggle-status`);
-      // Update the plan in the list
-      setAllPlans(prevPlans => 
-        prevPlans.map(plan => 
-          plan.id === planId ? response.data : plan
-        )
-      );
-      // If this is the currently selected plan, update it too
-      if (vetRecommendation?.id === planId) {
-        setVetRecommendation(response.data);
-      }
-    } catch (error) {
-      console.error("Failed to toggle plan status:", error);
-      // Show error message to user
-      const errorMessage = error.response?.data?.error || "ไม่สามารถเปลี่ยนสถานะแผนได้";
-      alert(errorMessage);
-    }
-  }
-
-  const handleDeletePlan = async (planId) => {
-    if (!window.confirm("คุณแน่ใจหรือไม่ที่จะลบแผนโภชนาการนี้?")) {
-      return;
-    }
-    
-    try {
-      await apiClient.delete(`/nutrition/recommendations/${planId}`);
-      // Remove the plan from the list
-      setAllPlans(prevPlans => prevPlans.filter(plan => plan.id !== planId));
-      // If this was the currently selected plan, clear it
-      if (vetRecommendation?.id === planId) {
-        setVetRecommendation(null);
-      }
-    } catch (error) {
-      console.error("Failed to delete plan:", error);
-      // Show error message to user
-      const errorMessage = error.response?.data?.error || "ไม่สามารถลบแผนได้";
-      alert(errorMessage);
-    }
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -205,108 +163,163 @@ const NutritionRecommendation = () => {
           </div>
         )}
 
-        {/* โหมดรายตัว: มี petId จึงแสดง Sidebar รายการแผนของสัตว์เลี้ยงนั้น และรายละเอียดแผนที่เลือก */}
+        {/* โหมดรายตัว: มี petId */}
         {petId && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="card md:col-span-1">
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">แผนทั้งหมดของ</h3>
-            <p className="text-sm text-gray-600 mb-3">{pet?.name || 'สัตว์เลี้ยงนี้'}</p>
-            {allPlans.length === 0 ? (
-              <p className="text-gray-500">ยังไม่มีแผน</p>
-            ) : (
-              <div className="space-y-2">
-                {allPlans.map(plan => (
-                  <div
-                    key={plan.id}
-                    className={`w-full p-3 rounded border ${vetRecommendation?.id === plan.id ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}
-                  >
-                    <button
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Sidebar: รายการแผน */}
+          <div className="lg:col-span-1 space-y-4">
+            {/* แผนปัจจุบัน (Active Plan) */}
+            <div className="card">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+                <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                แผนปัจจุบัน
+              </h3>
+              {allPlans.filter(p => p.is_active).length === 0 ? (
+                <div className="text-center py-6">
+                  <Utensils className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">ยังไม่มีแผนโภชนาการ</p>
+                  {user?.role === 'veterinarian' && (
+                    <button onClick={() => setShowVetForm(true)} className="btn-primary btn-sm mt-3">
+                      สร้างแผนใหม่
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {allPlans.filter(p => p.is_active).map(plan => (
+                    <div
+                      key={plan.id}
+                      className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                        vetRecommendation?.id === plan.id 
+                          ? 'border-green-500 bg-green-50' 
+                          : 'border-green-200 hover:border-green-400'
+                      }`}
                       onClick={() => {
                         setVetRecommendation(plan)
                         navigate({ pathname: `/pets/${petId}/nutrition`, search: `?plan_id=${plan.id}` })
                       }}
-                      className="w-full text-left"
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">{plan.is_active ? 'แผนปัจจุบัน' : 'แผนก่อนหน้า'}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded ${plan.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>{plan.is_active ? 'Active' : 'Inactive'}</span>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-1 rounded">
+                          ✓ กำลังใช้งาน
+                        </span>
                       </div>
-                      <div className="text-sm text-gray-600 mt-1">แคลอรี่/วัน: {plan.custom_calories ?? '-'}</div>
-                      <div className="text-xs text-gray-500">เริ่ม: {new Date(plan.start_date).toLocaleDateString('th-TH')}</div>
-                    </button>
-                    
-                    {/* ปุ่มจัดการสำหรับสัตวแพทย์ */}
-                    {user?.role === 'veterinarian' && (
-                      <div className="flex items-center justify-end space-x-2 mt-2 pt-2 border-t border-gray-200">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleToggleStatus(plan.id);
-                          }}
-                          className={`text-xs px-2 py-1 rounded flex items-center space-x-1 ${
-                            plan.is_active 
-                              ? 'text-orange-600 hover:bg-orange-50' 
-                              : 'text-green-600 hover:bg-green-50'
-                          }`}
-                          title={plan.is_active ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}
-                        >
-                          <Power size={12} />
-                          <span>{plan.is_active ? 'ปิด' : 'เปิด'}</span>
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeletePlan(plan.id);
-                          }}
-                          className="text-xs px-2 py-1 rounded text-red-600 hover:bg-red-50 flex items-center space-x-1"
-                          title="ลบแผน"
-                        >
-                          <Trash2 size={12} />
-                          <span>ลบ</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                      <p className="text-sm text-gray-700">
+                        <strong>สัตวแพทย์:</strong> {plan.veterinarian?.full_name || 'ไม่ระบุ'}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        <strong>แคลอรี่/วัน:</strong> {plan.custom_calories || '-'} kcal
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        เริ่ม: {new Date(plan.start_date).toLocaleDateString('th-TH')}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* แผนก่อนหน้า (Inactive Plans) */}
+            {allPlans.filter(p => !p.is_active).length > 0 && (
+              <div className="card">
+                <h3 className="text-md font-semibold text-gray-700 mb-3 flex items-center">
+                  <span className="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
+                  ประวัติแผนก่อนหน้า ({allPlans.filter(p => !p.is_active).length})
+                </h3>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {allPlans.filter(p => !p.is_active).map(plan => (
+                    <div
+                      key={plan.id}
+                      className={`p-2 rounded border cursor-pointer transition-all ${
+                        vetRecommendation?.id === plan.id 
+                          ? 'border-gray-400 bg-gray-50' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => {
+                        setVetRecommendation(plan)
+                        navigate({ pathname: `/pets/${petId}/nutrition`, search: `?plan_id=${plan.id}` })
+                      }}
+                    >
+                      <p className="text-xs text-gray-600">
+                        <strong>โดย:</strong> {plan.veterinarian?.full_name || 'ไม่ระบุ'}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {new Date(plan.start_date).toLocaleDateString('th-TH')} 
+                        {plan.end_date && ` - ${new Date(plan.end_date).toLocaleDateString('th-TH')}`}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
 
-          <div className="md:col-span-2">
+          {/* Main Content: รายละเอียดแผน */}
+          <div className="lg:col-span-2">
             {vetRecommendation ? (
-            <div className="card border-l-4 border-green-500">
-                <div className="flex justify-between items-start">
-                    <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">รายละเอียดคำแนะนำจากสัตวแพทย์</h3>
-                    <div className="mb-3 p-3 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-600 mb-1">
-                        <strong>สัตว์เลี้ยง:</strong> <span className="font-medium">{vetRecommendation.pets?.name || 'ไม่ระบุ'}</span>
-                      </p>
-                      <p className="text-sm text-gray-600 mb-1">
-                        <strong>สัตวแพทย์:</strong> <span className="font-medium">{vetRecommendation.veterinarian?.full_name || 'ไม่ระบุ'}</span>
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {vetRecommendation.pets?.species} - {vetRecommendation.pets?.breed || 'ไม่ระบุพันธุ์'} | 
-                        น้ำหนัก: {vetRecommendation.pets?.weight ? `${vetRecommendation.pets.weight} กก.` : 'ไม่ระบุ'}
-                      </p>
+            <div className={`card ${vetRecommendation.is_active ? 'border-l-4 border-green-500' : 'border-l-4 border-gray-400'}`}>
+                <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                        vetRecommendation.is_active ? 'bg-green-100' : 'bg-gray-100'
+                      }`}>
+                        <Utensils className={`h-6 w-6 ${vetRecommendation.is_active ? 'text-green-600' : 'text-gray-500'}`} />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900">
+                          {vetRecommendation.is_active ? 'แผนโภชนาการปัจจุบัน' : 'แผนโภชนาการก่อนหน้า'}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          {vetRecommendation.is_active ? 'กำลังใช้งาน' : 'สิ้นสุดแล้ว'}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">{vetRecommendation.custom_instructions}</p>
-                    {vetRecommendation.custom_calories && (
-                      <p className="text-gray-700 mt-3">พลังงานแนะนำต่อวัน: <span className="font-medium">{vetRecommendation.custom_calories}</span> kcal</p>
+                    {user?.role === 'veterinarian' && !showVetForm && vetRecommendation.is_active && (
+                      <button onClick={() => setShowVetForm(true)} className="btn-secondary btn-sm flex items-center space-x-1">
+                          <Edit size={16} />
+                          <span>สร้างแผนใหม่</span>
+                      </button>
                     )}
-                    </div>
-                    {user?.role === 'veterinarian' && !showVetForm && (
-                    <div className="flex space-x-2">
-                        <button onClick={() => setShowVetForm(true)} className="btn-secondary btn-sm">
-                            <Edit size={16} />
-                        </button>
-                    </div>
-                  )}
+                </div>
+                
+                {/* ข้อมูลแผน */}
+                <div className="mb-4 p-4 bg-gray-50 rounded-lg space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">สัตว์เลี้ยง:</span>
+                    <span className="text-sm font-medium text-gray-900">{vetRecommendation.pets?.name || 'ไม่ระบุ'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">สัตวแพทย์:</span>
+                    <span className="text-sm font-medium text-gray-900">{vetRecommendation.veterinarian?.full_name || 'ไม่ระบุ'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">แคลอรี่/วัน:</span>
+                    <span className="text-sm font-medium text-gray-900">{vetRecommendation.custom_calories || '-'} kcal</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">ระยะเวลา:</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {new Date(vetRecommendation.start_date).toLocaleDateString('th-TH')}
+                      {vetRecommendation.end_date && ` - ${new Date(vetRecommendation.end_date).toLocaleDateString('th-TH')}`}
+                    </span>
+                  </div>
+                </div>
+
+                {/* คำแนะนำโภชนาการ */}
+                <div>
+                  <h4 className="text-md font-semibold text-gray-900 mb-2">คำแนะนำโภชนาการ:</h4>
+                  <div className="p-4 bg-white border border-gray-200 rounded-lg">
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">{vetRecommendation.custom_instructions}</p>
+                  </div>
                 </div>
               </div>
             ) : (
-              <div className="card"><p className="text-gray-600">ยังไม่มีแผนที่เลือก</p></div>
-                    )}
+              <div className="card text-center py-12">
+                <Utensils className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">เลือกแผนโภชนาการ</h3>
+                <p className="text-gray-600">กรุณาเลือกแผนจากรายการด้านซ้าย</p>
+              </div>
+            )}
                 </div>
             </div>
         )}

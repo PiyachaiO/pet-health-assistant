@@ -385,7 +385,7 @@ router.delete(
   }
 )
 
-// Vet-specific recommendation for a pet
+// Vet-specific recommendation for a pet (One Active Plan Per Pet)
 router.post("/vet-recommendation", [
     body("pet_id").isUUID().withMessage("Valid pet ID is required"),
     body("custom_instructions").trim().isLength({ min: 10 }).withMessage("Instructions must be at least 10 characters"),
@@ -399,47 +399,59 @@ router.post("/vet-recommendation", [
     const { pet_id, custom_instructions, custom_calories } = req.body;
 
     try {
-        // Check if a plan already exists, update it. Otherwise, create a new one.
-        const { data: existingPlan, error: findError } = await supabase
+        // 1. Deactivate ALL existing active plans for this pet
+        await supabase
             .from("pet_nutrition_plans")
-            .select("id")
+            .update({ 
+                is_active: false,
+                end_date: new Date().toISOString().split('T')[0], // Set end_date to today
+                updated_at: new Date().toISOString() 
+            })
             .eq("pet_id", pet_id)
+            .eq("is_active", true);
+
+        console.log(`[Nutrition Plan] Deactivated all existing plans for pet: ${pet_id}`);
+
+        // 2. Create new active plan
+        const { data: newPlan, error } = await supabase
+            .from("pet_nutrition_plans")
+            .insert([{ 
+                pet_id, 
+                custom_instructions, 
+                custom_calories,
+                veterinarian_id: req.user.id,
+                is_active: true,
+                start_date: new Date().toISOString().split('T')[0]
+            }])
+            .select()
             .single();
 
-        let savedData;
+        if (error) throw error;
 
-        if (existingPlan) {
-            // Update existing plan
-            const { data, error } = await supabase
-                .from("pet_nutrition_plans")
-                .update({ 
-                    custom_instructions, 
-                    custom_calories,
-                    updated_at: new Date().toISOString() 
+        console.log(`[Nutrition Plan] Created new active plan: ${newPlan.id}`);
+
+        // 3. Send notification to pet owner
+        try {
+            const [{ data: petData }, { data: vetData }] = await Promise.all([
+                supabase.from("pets").select("user_id, name").eq("id", pet_id).single(),
+                supabase.from("users").select("full_name").eq("id", req.user.id).single()
+            ])
+
+            if (petData && vetData) {
+                console.log('[Nutrition Plan Created] Notifying user:', petData.user_id);
+                await notifyNutritionPlanCreated(petData.user_id, {
+                    id: newPlan.id,
+                    pet_id: pet_id,
+                    pet_name: petData.name,
+                    vet_name: vetData.full_name,
+                    custom_instructions: custom_instructions
                 })
-                .eq("id", existingPlan.id)
-                .select()
-                .single();
-            if (error) throw error;
-            savedData = data;
-        } else {
-            // Create new plan
-            const { data, error } = await supabase
-                .from("pet_nutrition_plans")
-                .insert([{ 
-                    pet_id, 
-                    custom_instructions, 
-                    custom_calories,
-                    veterinarian_id: req.user.id,
-                    is_active: true // Set as active by default
-                }])
-                .select()
-                .single();
-            if (error) throw error;
-            savedData = data;
+            }
+        } catch (notificationError) {
+            console.error("Failed to send nutrition plan notification:", notificationError)
         }
 
-        res.status(201).json(savedData);
+        res.status(201).json(newPlan);
 
     } catch (error) {
         console.error("Vet recommendation save error:", error);
