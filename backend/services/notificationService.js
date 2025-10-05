@@ -35,7 +35,7 @@ async function notifyNutritionPlanCreated(userId, nutritionData) {
   const notification = {
     user_id: userId,
     pet_id: nutritionData.pet_id || null,
-    notification_type: 'nutrition_plan_created', // ⚠️ ต้องเพิ่ม enum value ก่อน
+    notification_type: 'checkup_due', // ⚠️ ใช้ enum ที่มีอยู่แล้วชั่วคราว จนกว่าจะเพิ่ม nutrition_plan_created
     title: 'แผนโภชนาการใหม่',
     message: `สัตวแพทย์ ${nutritionData.vet_name} ได้สร้างแผนโภชนาการใหม่สำหรับ ${nutritionData.pet_name}`,
     priority: 'medium',
