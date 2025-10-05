@@ -18,7 +18,13 @@ const VetNutritionForm = ({ petId, existingRecommendation, planId, onSave, onCan
       setLoadingPets(true);
       try {
         const response = await apiClient.get('/pets');
-        setPets(response.data || []);
+        const petsData = response.data || [];
+        setPets(petsData);
+        
+        // ถ้าไม่มี petId จาก props และมีสัตว์เลี้ยงในระบบ → เลือกตัวแรกอัตโนมัติ
+        if (!petId && petsData.length > 0 && !selectedPetId) {
+          setSelectedPetId(petsData[0].id);
+        }
       } catch (err) {
         console.error('Failed to fetch pets:', err);
         setError('ไม่สามารถโหลดข้อมูลสัตว์เลี้ยงได้');
@@ -28,7 +34,7 @@ const VetNutritionForm = ({ petId, existingRecommendation, planId, onSave, onCan
     };
     
     fetchPets();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ดึงข้อมูลสัตว์เลี้ยงที่เลือก
   useEffect(() => {
