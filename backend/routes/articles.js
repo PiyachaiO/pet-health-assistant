@@ -157,7 +157,8 @@ router.post("/", validationRules.articleCreation, validateRequest, async (req, r
     const articleData = {
       ...req.body,
       author_id: req.user.id,
-     
+      status: 'published', // Auto-publish เมื่อสร้าง (ถ้าเป็น Admin)
+      published_at: req.user.role === 'admin' ? new Date().toISOString() : null
     }
 
     const { data, error } = await supabase
@@ -171,6 +172,21 @@ router.post("/", validationRules.articleCreation, validateRequest, async (req, r
         error: error.message,
         code: "ARTICLE_CREATION_FAILED",
       })
+    }
+
+    // ส่งการแจ้งเตือนเมื่อ Admin สร้างบทความ (auto-publish)
+    if (req.user.role === 'admin' && data.status === 'published') {
+      try {
+        console.log('[Article Created & Published] Sending notification to all users for article:', data.id);
+        await notifyAllNewArticlePublished({
+          id: data.id,
+          title: data.title,
+          author_id: data.author_id,
+          category: data.category
+        });
+      } catch (notificationError) {
+        console.error('[Article Created] Failed to send notification:', notificationError);
+      }
     }
 
     res.status(201).json(data)
