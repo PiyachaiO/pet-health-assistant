@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
-import { playNotificationSound, playUrgentSound } from '../../public/sounds/notification-sound';
+import { playNotificationSound, playUrgentSound } from '../utils/notificationSound';
 
 const SocketContext = createContext(null);
 
