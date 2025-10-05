@@ -49,6 +49,48 @@ async function notifyAppointmentStatusChanged(userId, appointmentData) {
 }
 
 /**
+ * แจ้งเตือนผู้ใช้เมื่อมีนัดหมายใหม่ (สร้างโดยสัตวแพทย์)
+ */
+async function notifyUserNewAppointment(userId, appointmentData) {
+  console.log('[notifyUserNewAppointment] Called with userId:', userId, 'appointmentData:', appointmentData);
+  
+  const notification = {
+    user_id: userId,
+    pet_id: appointmentData.pet_id || null,
+    notification_type: 'appointment_reminder',
+    title: 'นัดหมายใหม่',
+    message: `คุณมีนัดหมายใหม่กับ ${appointmentData.vet_name} วันที่ ${appointmentData.appointment_date}`,
+    priority: 'high',
+    due_date: appointmentData.appointment_date,
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('[notifyUserNewAppointment] Database error:', error);
+    return { data, error };
+  }
+
+  if (data) {
+    console.log('[notifyUserNewAppointment] Notification saved to DB:', data.id);
+    console.log('[notifyUserNewAppointment] Emitting to user:', userId);
+    
+    emitToUser(userId, 'notification:new_appointment', {
+      ...data,
+      appointment: appointmentData
+    });
+  }
+
+  return { data, error };
+}
+
+/**
  * แจ้งเตือนผู้ใช้เมื่อสัตวแพทย์ตอบกลับ
  */
 async function notifyVetResponded(userId, responseData) {
@@ -556,22 +598,65 @@ async function notifyAdminUserReport(reportData) {
 
 /**
  * แจ้งเตือนทุกคนเมื่อมีบทความใหม่
+ * สร้าง notification ให้ทุกคนที่ role = 'user' และ 'veterinarian'
  */
 async function notifyAllNewArticlePublished(articleData) {
   console.log('[notifyAllNewArticlePublished] Broadcasting new article:', articleData.title);
   
-  // Send real-time notification to all connected users
-  emitToAll('notification:new_article', {
-    id: articleData.id,
-    type: 'global_article',
-    title: 'บทความใหม่!',
-    message: `มีบทความใหม่: "${articleData.title}"`,
-    article: articleData,
-    is_read: false,
-    created_at: new Date().toISOString()
-  });
-  
-  console.log('[notifyAllNewArticlePublished] ✅ Broadcast sent to all users');
+  try {
+    // 1. ดึงรายชื่อ users ทั้งหมด (ยกเว้น admin)
+    const { data: users, error: usersError } = await supabase
+      .from('users')
+      .select('id')
+      .in('role', ['user', 'veterinarian'])
+      .eq('is_active', true);
+
+    if (usersError) {
+      console.error('[notifyAllNewArticlePublished] Error fetching users:', usersError);
+      return;
+    }
+
+    console.log(`[notifyAllNewArticlePublished] Found ${users.length} users to notify`);
+
+    // 2. สร้าง notification สำหรับทุกคน
+    const notifications = users.map(user => ({
+      user_id: user.id,
+      pet_id: null,
+      notification_type: 'article_published',
+      title: 'บทความใหม่!',
+      message: `มีบทความใหม่: "${articleData.title}"`,
+      priority: 'low',
+      is_read: false,
+      is_completed: false
+    }));
+
+    // 3. Insert แบบ batch
+    const { data: insertedNotifications, error: insertError } = await supabase
+      .from('notifications')
+      .insert(notifications)
+      .select();
+
+    if (insertError) {
+      console.error('[notifyAllNewArticlePublished] Error inserting notifications:', insertError);
+    } else {
+      console.log(`[notifyAllNewArticlePublished] ✅ Created ${insertedNotifications.length} notifications in database`);
+    }
+
+    // 4. Send real-time notification to all connected users
+    emitToAll('notification:new_article', {
+      id: articleData.id,
+      type: 'global_article',
+      title: 'บทความใหม่!',
+      message: `มีบทความใหม่: "${articleData.title}"`,
+      article: articleData,
+      is_read: false,
+      created_at: new Date().toISOString()
+    });
+    
+    console.log('[notifyAllNewArticlePublished] ✅ Broadcast sent to all connected users');
+  } catch (error) {
+    console.error('[notifyAllNewArticlePublished] Unexpected error:', error);
+  }
 }
 
 /**
@@ -589,6 +674,7 @@ async function notifyAllAnnouncement(announcementData) {
 
 module.exports = {
   // User notifications
+  notifyUserNewAppointment,
   notifyAppointmentStatusChanged,
   notifyVetResponded,
   notifyNutritionPlanCreated,

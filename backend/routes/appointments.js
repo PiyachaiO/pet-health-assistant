@@ -3,6 +3,7 @@ const { supabase } = require("../config/supabase")
 const { validationRules, validateRequest } = require("../middleware/validation")
 const { authenticateToken } = require("../middleware/auth")
 const {
+  notifyUserNewAppointment,
   notifyAppointmentStatusChanged,
   notifyVetNewAppointment,
   notifyVetAppointmentCancelled,
@@ -160,17 +161,28 @@ router.get("/vet", async (req, res) => {
 router.post("/", validationRules.appointmentCreation, validateRequest, async (req, res) => {
   try {
     // Backward compatibility: map vet_id -> veterinarian_id if provided
-    const { vet_id, ...rest } = req.body || {}
-    const appointmentData = {
+    const { vet_id, user_id, ...rest } = req.body || {}
+    
+    // กำหนด user_id และ veterinarian_id ตาม role ของผู้สร้าง
+    let appointmentData = {
       ...rest,
-      user_id: req.user.id,
       status: "scheduled",
-      ...(vet_id ? { veterinarian_id: vet_id } : {}),
     }
 
-    // ถ้าไม่มี veterinarian_id และ user เป็น veterinarian ให้ใส่ตัวเอง
-    if (!appointmentData.veterinarian_id && req.user.role === "veterinarian") {
-      appointmentData.veterinarian_id = req.user.id
+    if (req.user.role === "veterinarian") {
+      // ถ้า Vet สร้าง: ต้องระบุ user_id มาด้วย
+      if (!user_id) {
+        return res.status(400).json({
+          error: "user_id is required when veterinarian creates appointment",
+          code: "USER_ID_REQUIRED",
+        })
+      }
+      appointmentData.user_id = user_id // User ที่มารับบริการ
+      appointmentData.veterinarian_id = req.user.id // Vet คือคนสร้าง
+    } else {
+      // ถ้า User สร้าง: user_id คือตัวเอง
+      appointmentData.user_id = req.user.id
+      appointmentData.veterinarian_id = vet_id || rest.veterinarian_id || null
     }
 
     const { data, error } = await supabase
@@ -194,35 +206,53 @@ router.post("/", validationRules.appointmentCreation, validateRequest, async (re
         veterinarian_id: data.veterinarian_id,
         pet_id: data.pet_id,
         appointment_date: data.appointment_date,
-        appointment_type: data.appointment_type
+        appointment_type: data.appointment_type,
+        created_by: req.user.role
       });
 
-      // ดึงข้อมูลผู้ใช้สำหรับการแจ้งเตือน
-      const { data: userData, error: userError } = await supabase
-        .from("users")
-        .select("id, full_name, email")
-        .eq("id", data.user_id)
-        .single()
+      // ดึงข้อมูลผู้ใช้และสัตวแพทย์
+      const [{ data: userData }, { data: vetData }] = await Promise.all([
+        supabase.from("users").select("id, full_name, email").eq("id", data.user_id).single(),
+        data.veterinarian_id 
+          ? supabase.from("users").select("id, full_name, email").eq("id", data.veterinarian_id).single()
+          : { data: null }
+      ])
 
       console.log('[Appointment Created] User data:', userData);
+      console.log('[Appointment Created] Vet data:', vetData);
 
-      // แจ้งเตือนสัตวแพทย์ผ่าน Socket.IO (Real-time)
-      if (!data.veterinarian_id) {
-        console.warn('[Appointment Created] ⚠️  No veterinarian_id found! Cannot send notification.');
-      } else if (!userData) {
-        console.warn('[Appointment Created] ⚠️  No user data found! Cannot send notification.');
+      // แจ้งเตือนตาม role ของผู้สร้าง
+      if (req.user.role === "veterinarian") {
+        // Vet สร้าง → แจ้งเตือน User
+        if (userData) {
+          console.log('[Appointment Created] ✅ Vet created appointment, notifying user:', data.user_id);
+          await notifyUserNewAppointment(data.user_id, {
+            id: data.id,
+            vet_name: req.user.full_name,
+            appointment_date: data.appointment_date,
+            appointment_time: data.appointment_time,
+            appointment_type: data.appointment_type,
+            pet_id: data.pet_id,
+            notes: data.notes
+          })
+        }
       } else {
-        console.log('[Appointment Created] ✅ Calling notifyVetNewAppointment for vet:', data.veterinarian_id);
-        await notifyVetNewAppointment(data.veterinarian_id, {
-          id: data.id,
-          user_name: userData.full_name,
-          user_email: userData.email,
-          appointment_date: data.appointment_date,
-          appointment_time: data.appointment_time,
-          appointment_type: data.appointment_type,
-          pet_id: data.pet_id,
-          notes: data.notes
-        })
+        // User สร้าง → แจ้งเตือน Vet
+        if (data.veterinarian_id && userData) {
+          console.log('[Appointment Created] ✅ User created appointment, notifying vet:', data.veterinarian_id);
+          await notifyVetNewAppointment(data.veterinarian_id, {
+            id: data.id,
+            user_name: userData.full_name,
+            user_email: userData.email,
+            appointment_date: data.appointment_date,
+            appointment_time: data.appointment_time,
+            appointment_type: data.appointment_type,
+            pet_id: data.pet_id,
+            notes: data.notes
+          })
+        } else {
+          console.warn('[Appointment Created] ⚠️  No veterinarian_id found! Cannot send notification.');
+        }
       }
     } catch (notificationError) {
       console.error("Failed to create notification:", notificationError)

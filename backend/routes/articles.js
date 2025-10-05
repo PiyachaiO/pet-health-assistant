@@ -158,7 +158,7 @@ router.post("/", validationRules.articleCreation, validateRequest, async (req, r
       ...req.body,
       author_id: req.user.id,
       is_published: req.user.role === 'admin', // Auto-publish เมื่อสร้าง (ถ้าเป็น Admin)
-      published_at: req.user.role === 'admin' ? new Date().toISOString() : null
+      published_at: req.user.role === 'admin' ? new Date().toISOString() : null 
     }
 
     const { data, error } = await supabase
