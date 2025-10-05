@@ -27,7 +27,12 @@ const Notifications = () => {
         const unique = merged.filter((notification, index, self) =>
           index === self.findIndex((n) => n.id === notification.id)
         )
-        return unique
+        // Sort by created_at (newest first)
+        return unique.sort((a, b) => {
+          const dateA = new Date(a.created_at || 0)
+          const dateB = new Date(b.created_at || 0)
+          return dateB - dateA
+        })
       })
     }
   }, [socketNotifications])

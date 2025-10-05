@@ -20,6 +20,7 @@ async function notifyAppointmentStatusChanged(userId, appointmentData) {
 
   const notification = {
     user_id: userId,
+    pet_id: appointmentData.pet_id || null, // เพิ่ม pet_id
     notification_type: 'appointment_reminder',
     title: 'สถานะนัดหมายเปลี่ยนแปลง',
     message: statusMessages[appointmentData.status] || 'สถานะนัดหมายของคุณมีการเปลี่ยนแปลง',
@@ -213,6 +214,7 @@ async function notifyVetNewAppointment(vetId, appointmentData) {
   
   const notification = {
     user_id: vetId,
+    pet_id: appointmentData.pet_id || null, // เพิ่ม pet_id
     notification_type: 'appointment_reminder',
     title: 'นัดหมายใหม่',
     message: `คุณมีนัดหมายใหม่จาก ${appointmentData.user_name} วันที่ ${appointmentData.appointment_date}`,

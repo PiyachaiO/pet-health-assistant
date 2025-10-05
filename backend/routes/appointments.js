@@ -337,6 +337,7 @@ router.patch("/:id/status", [
         appointment_date: data.appointment_date,
         appointment_time: data.appointment_time,
         appointment_type: data.appointment_type,
+        pet_id: data.pet_id, // เพิ่ม pet_id
         pet_name: data.pets?.name || 'สัตว์เลี้ยง',
         pet_species: data.pets?.species,
         veterinarian_id: data.veterinarian_id
