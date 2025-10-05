@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "../contexts/AuthContext"
 import { useSocket } from "../contexts/SocketContext"
 import apiClient from "../services/api"
-import { Bell, Check, Clock, AlertCircle, Calendar, User, FileText, Wifi, WifiOff } from "lucide-react"
+import { Bell, Check, Clock, AlertCircle, Calendar, User, FileText, Wifi, WifiOff, Utensils, Stethoscope, Syringe, Pill } from "lucide-react"
 
 const Notifications = () => {
   const { user } = useAuth()
@@ -101,27 +101,27 @@ const Notifications = () => {
   })
 
   const getNotificationIcon = (notification) => {
-    // ไอคอนพิเศษสำหรับ article_published
-    if (notification.notification_type === "article_published") {
-      return <FileText className="h-5 w-5 text-purple-500" />
+    // ไอคอนพิเศษสำหรับแต่ละประเภท
+    switch (notification.notification_type) {
+      case "article_published":
+        return <FileText className="h-5 w-5 text-purple-500" />
+      case "checkup_due":
+        // ถ้า title เป็นแผนโภชนาการ แสดงไอคอน Utensils
+        if (notification.title?.includes("โภชนาการ")) {
+          return <Utensils className="h-5 w-5 text-orange-500" />
+        }
+        return <Stethoscope className="h-5 w-5 text-blue-500" />
+      case "health_record_updated":
+        return <Stethoscope className="h-5 w-5 text-blue-500" />
+      case "appointment_reminder":
+        return <Calendar className="h-5 w-5 text-blue-500" />
+      case "vaccination_due":
+        return <Syringe className="h-5 w-5 text-green-500" />
+      case "medication_reminder":
+        return <Pill className="h-5 w-5 text-yellow-500" />
+      default:
+        return getPriorityIcon(notification.priority)
     }
-
-    // สำหรับสัตวแพทย์: แสดงไอคอนตามประเภทการแจ้งเตือน
-    if (user?.role === "veterinarian") {
-      switch (notification.notification_type) {
-        case "appointment_reminder":
-          return <Calendar className="h-5 w-5 text-blue-500" />
-        case "vaccination_due":
-        case "medication_reminder":
-        case "checkup_due":
-          return <FileText className="h-5 w-5 text-green-500" />
-        default:
-          return getPriorityIcon(notification.priority)
-      }
-    }
-    
-    // สำหรับผู้ใช้ทั่วไป: ใช้ไอคอนตามความสำคัญ
-    return getPriorityIcon(notification.priority)
   }
 
   const getPriorityIcon = (priority) => {
@@ -140,14 +140,20 @@ const Notifications = () => {
     switch (type) {
       case "article_published":
         return "บทความใหม่"
+      case "checkup_due":
+        // ถ้า title เป็นแผนโภชนาการ แสดงข้อความที่ถูกต้อง
+        if (title?.includes("โภชนาการ")) {
+          return "แผนโภชนาการใหม่"
+        }
+        return "ถึงกำหนดตรวจสุขภาพ"
+      case "health_record_updated":
+        return "บันทึกสุขภาพอัปเดต"
       case "appointment_reminder":
         return "เตือนนัดหมาย"
       case "vaccination_due":
         return "ถึงกำหนดฉีดวัคซีน"
       case "medication_reminder":
         return "เตือนให้ยา"
-      case "checkup_due":
-        return "ถึงกำหนดตรวจสุขภาพ"
       default:
         return type
     }

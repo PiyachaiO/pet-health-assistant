@@ -20,7 +20,7 @@ const AdminDashboard = () => {
   const { user } = useAuth()
   const [stats, setStats] = useState(null)
   const [users, setUsers] = useState([])
-  const [pendingApprovals, setPendingApprovals] = useState({ appointments: [], nutrition_guidelines: [] })
+  const [pendingApprovals, setPendingApprovals] = useState({ appointments: [] })
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("overview")
   const [selectedApproval, setSelectedApproval] = useState(null)
@@ -147,27 +147,15 @@ const AdminDashboard = () => {
       await apiClient.patch(endpoint, payload)
 
       // อัพเดทข้อมูลในหน้า
-      if (selectedApproval.type === "appointment") {
-        setPendingApprovals((prev) => ({
-          ...prev,
-          appointments: prev.appointments.filter((a) => a.id !== selectedApproval.id),
-        }))
-      } else {
-        setPendingApprovals((prev) => ({
-          ...prev,
-          nutrition_guidelines: prev.nutrition_guidelines.filter((n) => n.id !== selectedApproval.id),
-        }))
-      }
+      setPendingApprovals((prev) => ({
+        ...prev,
+        appointments: prev.appointments.filter((a) => a.id !== selectedApproval.id),
+      }))
 
       // อัพเดทสถิติ
       setStats((prev) => ({
         ...prev,
-        pending_appointments:
-          selectedApproval.type === "appointment" ? prev.pending_appointments - 1 : prev.pending_appointments,
-        pending_nutrition_guidelines:
-          selectedApproval.type === "nutrition"
-            ? prev.pending_nutrition_guidelines - 1
-            : prev.pending_nutrition_guidelines,
+        pending_appointments: prev.pending_appointments - 1,
       }))
 
       setShowApprovalModal(false)
@@ -275,7 +263,7 @@ const AdminDashboard = () => {
                 <div className="ml-4">
                   <p className="text-sm text-gray-600">รอการอนุมัติ</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {(stats.pending_appointments || 0) + (stats.pending_nutrition_guidelines || 0)} รายการ
+                    {stats.pending_appointments || 0} รายการ
                   </p>
                 </div>
               </div>
@@ -349,7 +337,7 @@ const AdminDashboard = () => {
               { key: "overview", label: "ภาพรวม" },
               {
                 key: "approvals",
-                label: `การอนุมัติ (${(stats?.pending_appointments || 0) + (stats?.pending_nutrition_guidelines || 0)})`,
+                label: `การอนุมัติ (${stats?.pending_appointments || 0})`,
               },
               { key: "users", label: "จัดการผู้ใช้" },
             ].map((tab) => (
@@ -511,89 +499,6 @@ const AdminDashboard = () => {
                           </button>
                           <button
                             onClick={() => handleApprovalAction(appointment, "appointment", "reject")}
-                            className="flex items-center space-x-1 bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600"
-                          >
-                            <XCircle className="h-4 w-4" />
-                            <span>ปฏิเสธ</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Pending Nutrition Guidelines */}
-            <div className="card">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  แผนโภชนาการรอการอนุมัติ ({pendingApprovals.nutrition_guidelines?.length || 0})
-                </h3>
-                <AlertTriangle className="h-5 w-5 text-blue-500" />
-              </div>
-
-              {!pendingApprovals.nutrition_guidelines || pendingApprovals.nutrition_guidelines.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">ไม่มีแผนโภชนาการรอการอนุมัติ</div>
-              ) : (
-                <div className="space-y-4">
-                  {pendingApprovals.nutrition_guidelines.map((guideline) => (
-                    <div key={guideline.id} className="border rounded-lg p-4 bg-blue-50">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <FileText className="h-4 w-4 text-blue-500" />
-                            <span className="font-medium text-gray-900">แผนโภชนาการ - {guideline.species_name}</span>
-                            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">รอการอนุมัติ</span>
-                          </div>
-
-                          <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-600">
-                            <div>
-                              <p>
-                                <strong>สัตวแพทย์:</strong> {guideline.veterinarian_name}
-                              </p>
-                              <p>
-                                <strong>ชนิดสัตว์:</strong> {guideline.species_name}
-                              </p>
-                              <p>
-                                <strong>สายพันธุ์:</strong> {guideline.breed_name || "ทั่วไป"}
-                              </p>
-                            </div>
-                            <div>
-                              <p>
-                                <strong>แคลอรี่/วัน:</strong> {guideline.daily_calories} kcal
-                              </p>
-                              <p>
-                                <strong>โปรตีน:</strong> {guideline.protein_percentage}%
-                              </p>
-                              <p>
-                                <strong>ไขมัน:</strong> {guideline.fat_percentage}%
-                              </p>
-                              <p>
-                                <strong>มื้อ/วัน:</strong> {guideline.feeding_frequency} มื้อ
-                              </p>
-                            </div>
-                          </div>
-
-                          {guideline.special_instructions && (
-                            <div className="mt-3 p-3 bg-gray-50 rounded-md">
-                              <p className="text-sm text-gray-700">
-                                <strong>คำแนะนำพิเศษ:</strong> {guideline.special_instructions}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex space-x-2 ml-4">
-                          <button
-                            onClick={() => handleApprovalAction(guideline, "nutrition", "approve")}
-                            className="flex items-center space-x-1 bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:bg-green-600"
-                          >
-                            <CheckCircle className="h-4 w-4" />
-                            <span>อนุมัติ</span>
-                          </button>
-                          <button
-                            onClick={() => handleApprovalAction(guideline, "nutrition", "reject")}
                             className="flex items-center space-x-1 bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600"
                           >
                             <XCircle className="h-4 w-4" />
