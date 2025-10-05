@@ -76,7 +76,7 @@ async function notifyHealthRecordUpdated(userId, healthRecordData) {
   const notification = {
     user_id: userId,
     pet_id: healthRecordData.pet_id || null,
-    notification_type: 'appointment_reminder', // ใช้ enum ที่มีอยู่
+    notification_type: 'checkup_due', // ⚠️ ใช้ enum ที่มีอยู่แล้วชั่วคราว
     title: 'บันทึกสุขภาพอัปเดต',
     message: `สัตวแพทย์ ${healthRecordData.vet_name} ได้อัปเดตบันทึกสุขภาพของ ${healthRecordData.pet_name}`,
     priority: 'medium',
@@ -247,37 +247,6 @@ async function notifyNutritionPlanCreated(userId, petId, planData) {
     emitToUser(userId, 'notification:nutrition_plan', {
       ...data,
       plan: planData
-    });
-  }
-
-  return { data, error };
-}
-
-/**
- * แจ้งเตือนผู้ใช้เมื่อบันทึกสุขภาพถูกอัปเดต
- */
-async function notifyHealthRecordUpdated(userId, petId, recordData) {
-  const notification = {
-    user_id: userId,
-    pet_id: petId,
-    notification_type: 'health_update',
-    title: 'บันทึกสุขภาพอัปเดต',
-    message: `บันทึกสุขภาพของ ${recordData.pet_name} ถูกอัปเดตแล้ว`,
-    priority: 'low',
-    is_read: false,
-    is_completed: false
-  };
-
-  const { data, error } = await supabase
-    .from('notifications')
-    .insert(notification)
-    .select()
-    .single();
-
-  if (!error && data) {
-    emitToUser(userId, 'notification:health_record', {
-      ...data,
-      record: recordData
     });
   }
 

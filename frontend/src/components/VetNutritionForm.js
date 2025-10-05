@@ -50,35 +50,19 @@ const VetNutritionForm = ({ petId, existingRecommendation, planId, onSave, onCan
     setError('');
 
     try {
-      let response;
-      
-      if (planId) {
-        // Update existing plan
-        if (!selectedPetId) {
-          setError('กรุณาเลือกสัตว์เลี้ยง');
-          setSaving(false);
-          return;
-        }
-        
-        response = await apiClient.put(`/nutrition/recommendations/${planId}`, {
-          pet_id: selectedPetId,
-          custom_instructions: instructions,
-          custom_calories: calories ? parseInt(calories) : null
-        });
-      } else {
-        // Create new plan
-        if (!selectedPetId) {
-          setError('กรุณาเลือกสัตว์เลี้ยง');
-          setSaving(false);
-          return;
-        }
-        
-        response = await apiClient.post('/nutrition/vet-recommendation', {
-          pet_id: selectedPetId,
-          custom_instructions: instructions,
-          custom_calories: calories ? parseInt(calories) : null
-        });
+      // One Active Plan Per Pet: Always create a new plan
+      // Old plans will be auto-deactivated by backend
+      if (!selectedPetId) {
+        setError('กรุณาเลือกสัตว์เลี้ยง');
+        setSaving(false);
+        return;
       }
+      
+      const response = await apiClient.post('/nutrition/vet-recommendation', {
+        pet_id: selectedPetId,
+        custom_instructions: instructions,
+        custom_calories: calories ? parseInt(calories) : null
+      });
       
       onSave(response.data);
     } catch (err) {
@@ -93,8 +77,11 @@ const VetNutritionForm = ({ petId, existingRecommendation, planId, onSave, onCan
   return (
     <div className="card mt-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
-        {existingRecommendation ? 'แก้ไขคำแนะนำโภชนาการ' : 'เพิ่มคำแนะนำโภชนาการ'}
+        สร้างแผนโภชนาการใหม่
       </h3>
+      <p className="text-sm text-gray-600 mb-4">
+        แผนใหม่จะแทนที่แผนปัจจุบัน และแผนเก่าจะถูกเก็บเป็นประวัติอัตโนมัติ
+      </p>
       <form onSubmit={handleSubmit}>
         {error && <p className="text-red-500 mb-4">{error}</p>}
         
@@ -172,7 +159,7 @@ const VetNutritionForm = ({ petId, existingRecommendation, planId, onSave, onCan
           </button>
           <button type="submit" className="btn-primary" disabled={saving}>
             <Save size={18} className="mr-2" />
-            {saving ? 'กำลังบันทึก...' : (planId ? 'อัปเดตคำแนะนำ' : 'บันทึกคำแนะนำ')}
+            {saving ? 'กำลังสร้างแผน...' : 'สร้างแผนใหม่'}
           </button>
         </div>
       </form>
