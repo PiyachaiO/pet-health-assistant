@@ -209,6 +209,8 @@ async function notifyMedicationReminder(userId, petId, medicationData) {
  * แจ้งเตือนสัตวแพทย์เมื่อมีนัดหมายใหม่
  */
 async function notifyVetNewAppointment(vetId, appointmentData) {
+  console.log('[notifyVetNewAppointment] Called with vetId:', vetId, 'appointmentData:', appointmentData);
+  
   const notification = {
     user_id: vetId,
     notification_type: 'appointment_reminder',
@@ -226,13 +228,22 @@ async function notifyVetNewAppointment(vetId, appointmentData) {
     .select()
     .single();
 
-  if (!error && data) {
+  if (error) {
+    console.error('[notifyVetNewAppointment] Database error:', error);
+    return { data, error };
+  }
+
+  if (data) {
+    console.log('[notifyVetNewAppointment] Notification saved to DB:', data.id);
+    console.log('[notifyVetNewAppointment] Emitting to user:', vetId);
+    
     emitToUser(vetId, 'notification:new_appointment', {
       ...data,
       appointment: appointmentData
     });
 
     // ส่งไปยังทุกสัตวแพทย์ที่ออนไลน์
+    console.log('[notifyVetNewAppointment] Broadcasting to all vets');
     emitToRole('veterinarian', 'notification:new_appointment_broadcast', {
       ...data,
       appointment: appointmentData
@@ -594,4 +605,5 @@ module.exports = {
   notifyAllNewArticle,
   notifyAllAnnouncement
 };
+
 

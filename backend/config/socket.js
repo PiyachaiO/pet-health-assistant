@@ -123,13 +123,22 @@ function getIO() {
  * @param {string} event - Event name
  * @param {Object} data - Data to send
  */
-function emitToUser(userId, event, data) {
+async function emitToUser(userId, event, data) {
   if (!io) {
     console.warn('Socket.IO not initialized. Notification not sent.');
     return;
   }
+  
+  // Check if user is in the room
+  const sockets = await io.in(`user:${userId}`).fetchSockets();
+  console.log(`📤 Attempting to send "${event}" to user ${userId} (${sockets.length} sockets in room)`);
+  
+  if (sockets.length === 0) {
+    console.warn(`⚠️  No sockets found for user ${userId}. User might be offline.`);
+  }
+  
   io.to(`user:${userId}`).emit(event, data);
-  console.log(`📤 Sent "${event}" to user ${userId}`);
+  console.log(`✅ Emitted "${event}" to user:${userId}`);
 }
 
 /**
@@ -138,13 +147,22 @@ function emitToUser(userId, event, data) {
  * @param {string} event - Event name
  * @param {Object} data - Data to send
  */
-function emitToRole(role, event, data) {
+async function emitToRole(role, event, data) {
   if (!io) {
     console.warn('Socket.IO not initialized. Notification not sent.');
     return;
   }
+  
+  // Check how many sockets are in the role room
+  const sockets = await io.in(`role:${role}`).fetchSockets();
+  console.log(`📤 Attempting to send "${event}" to role ${role} (${sockets.length} sockets in room)`);
+  
+  if (sockets.length === 0) {
+    console.warn(`⚠️  No sockets found for role ${role}. No users with this role are online.`);
+  }
+  
   io.to(`role:${role}`).emit(event, data);
-  console.log(`📤 Sent "${event}" to role ${role}`);
+  console.log(`✅ Emitted "${event}" to role:${role}`);
 }
 
 /**
