@@ -145,6 +145,14 @@ export const SocketProvider = ({ children }) => {
     // New appointment for vet
     socketInstance.on('notification:new_appointment', (data) => {
       console.log('📬 New appointment for vet:', data);
+      console.log('📬 Notification details:', {
+        id: data.id,
+        title: data.title,
+        message: data.message,
+        user_id: data.user_id,
+        pet_id: data.pet_id,
+        created_at: data.created_at
+      });
       addNotification(data);
       showToast('นัดหมายใหม่', data.message, 'info');
     });

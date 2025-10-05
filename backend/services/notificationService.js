@@ -1,5 +1,5 @@
 const { emitToUser, emitToRole, emitToAll } = require('../config/socket');
-const supabase = require('../config/supabase');
+const { supabase } = require('../config/supabase');
 
 /**
  * Notification Service

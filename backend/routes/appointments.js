@@ -188,6 +188,15 @@ router.post("/", validationRules.appointmentCreation, validateRequest, async (re
 
     // สร้างการแจ้งเตือนอัตโนมัติเมื่อมีการนัดหมายใหม่ (พร้อม Real-time Socket.IO)
     try {
+      console.log('[Appointment Created] Appointment data:', {
+        id: data.id,
+        user_id: data.user_id,
+        veterinarian_id: data.veterinarian_id,
+        pet_id: data.pet_id,
+        appointment_date: data.appointment_date,
+        appointment_type: data.appointment_type
+      });
+
       // ดึงข้อมูลผู้ใช้สำหรับการแจ้งเตือน
       const { data: userData, error: userError } = await supabase
         .from("users")
@@ -195,8 +204,15 @@ router.post("/", validationRules.appointmentCreation, validateRequest, async (re
         .eq("id", data.user_id)
         .single()
 
+      console.log('[Appointment Created] User data:', userData);
+
       // แจ้งเตือนสัตวแพทย์ผ่าน Socket.IO (Real-time)
-      if (data.veterinarian_id && userData) {
+      if (!data.veterinarian_id) {
+        console.warn('[Appointment Created] ⚠️  No veterinarian_id found! Cannot send notification.');
+      } else if (!userData) {
+        console.warn('[Appointment Created] ⚠️  No user data found! Cannot send notification.');
+      } else {
+        console.log('[Appointment Created] ✅ Calling notifyVetNewAppointment for vet:', data.veterinarian_id);
         await notifyVetNewAppointment(data.veterinarian_id, {
           id: data.id,
           user_name: userData.full_name,
