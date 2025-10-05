@@ -154,12 +154,18 @@ router.post("/", validationRules.articleCreation, validateRequest, async (req, r
       })
     }
 
+    // Auto-publish สำหรับทั้ง Admin และ Vet
+    const shouldAutoPublish = req.user.role === 'admin' || req.user.role === 'veterinarian';
+    
     const articleData = {
       ...req.body,
       author_id: req.user.id,
-      is_published: req.user.role === 'admin', // Auto-publish เมื่อสร้าง (ถ้าเป็น Admin)
-      published_at: req.user.role === 'admin' ? new Date().toISOString() : null 
+      is_published: shouldAutoPublish, // Auto-publish เมื่อ Admin หรือ Vet สร้าง
+      published_at: shouldAutoPublish ? new Date().toISOString() : null 
     }
+
+    console.log('[Article Create] User role:', req.user.role);
+    console.log('[Article Create] Will auto-publish:', shouldAutoPublish);
 
     const { data, error } = await supabase
       .from("articles")
@@ -174,8 +180,10 @@ router.post("/", validationRules.articleCreation, validateRequest, async (req, r
       })
     }
 
-    // ส่งการแจ้งเตือนเมื่อ Admin สร้างบทความ (auto-publish)
-    if (req.user.role === 'admin' && data.is_published) {
+    console.log('[Article Create] Created article:', data.id, 'is_published:', data.is_published);
+
+    // ส่งการแจ้งเตือนเมื่อ Admin หรือ Vet สร้างบทความ (auto-publish)
+    if (data.is_published) {
       try {
         console.log('[Article Created & Published] Sending notification to all users for article:', data.id);
         await notifyAllNewArticlePublished({
@@ -187,6 +195,8 @@ router.post("/", validationRules.articleCreation, validateRequest, async (req, r
       } catch (notificationError) {
         console.error('[Article Created] Failed to send notification:', notificationError);
       }
+    } else {
+      console.log('[Article Create] Article saved as draft, no notification sent');
     }
 
     res.status(201).json(data)

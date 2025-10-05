@@ -6,6 +6,23 @@ const { supabase } = require('../config/supabase');
  * จัดการการส่งการแจ้งเตือนแบบ real-time และบันทึกลงฐานข้อมูล
  */
 
+// Helper function to format date in Thai format
+function formatThaiDate(dateString) {
+  try {
+    const date = new Date(dateString);
+    const options = { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      timeZone: 'Asia/Bangkok'
+    };
+    return date.toLocaleDateString('th-TH', options);
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return dateString;
+  }
+}
+
 // ==================== USER NOTIFICATIONS ====================
 
 /**
@@ -54,12 +71,14 @@ async function notifyAppointmentStatusChanged(userId, appointmentData) {
 async function notifyUserNewAppointment(userId, appointmentData) {
   console.log('[notifyUserNewAppointment] Called with userId:', userId, 'appointmentData:', appointmentData);
   
+  const formattedDate = formatThaiDate(appointmentData.appointment_date);
+  
   const notification = {
     user_id: userId,
     pet_id: appointmentData.pet_id || null,
     notification_type: 'appointment_reminder',
     title: 'นัดหมายใหม่',
-    message: `คุณมีนัดหมายใหม่กับ ${appointmentData.vet_name} วันที่ ${appointmentData.appointment_date}`,
+    message: `คุณมีนัดหมายใหม่กับ ${appointmentData.vet_name} วันที่ ${formattedDate}`,
     priority: 'high',
     due_date: appointmentData.appointment_date,
     is_read: false,
@@ -254,12 +273,14 @@ async function notifyMedicationReminder(userId, petId, medicationData) {
 async function notifyVetNewAppointment(vetId, appointmentData) {
   console.log('[notifyVetNewAppointment] Called with vetId:', vetId, 'appointmentData:', appointmentData);
   
+  const formattedDate = formatThaiDate(appointmentData.appointment_date);
+  
   const notification = {
     user_id: vetId,
     pet_id: appointmentData.pet_id || null, // เพิ่ม pet_id
     notification_type: 'appointment_reminder',
     title: 'นัดหมายใหม่',
-    message: `คุณมีนัดหมายใหม่จาก ${appointmentData.user_name} วันที่ ${appointmentData.appointment_date}`,
+    message: `คุณมีนัดหมายใหม่จาก ${appointmentData.user_name} วันที่ ${formattedDate}`,
     priority: 'high',
     due_date: appointmentData.appointment_date,
     is_read: false,
