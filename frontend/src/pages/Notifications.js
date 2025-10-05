@@ -131,7 +131,12 @@ const Notifications = () => {
     }
   }
 
-  const getNotificationTypeText = (type) => {
+  const getNotificationTypeText = (type, title) => {
+    // ถ้า title เป็น "บทความใหม่!" แสดงว่าเป็น article notification
+    if (title?.includes("บทความใหม่")) {
+      return "บทความใหม่"
+    }
+    
     switch (type) {
       case "appointment_reminder":
         return "เตือนนัดหมาย"
@@ -141,8 +146,6 @@ const Notifications = () => {
         return "เตือนให้ยา"
       case "checkup_due":
         return "ถึงกำหนดตรวจสุขภาพ"
-      case "article_published":
-        return "บทความใหม่"
       default:
         return type
     }
