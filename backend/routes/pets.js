@@ -2,6 +2,7 @@ const express = require("express")
 const { supabase } = require("../config/supabase")
 const { validationRules, validateRequest } = require("../middleware/validation")
 const { authenticateToken } = require("../middleware/auth")
+const { notifyHealthRecordUpdated } = require("../services/notificationService")
 
 const router = express.Router()
 
@@ -269,6 +270,30 @@ router.post(
           error: error.message,
           code: "HEALTH_RECORD_CREATION_FAILED",
         })
+      }
+
+      // ส่งการแจ้งเตือนถึงเจ้าของสัตว์เลี้ยง (เฉพาะกรณีที่สัตวแพทย์เป็นคนสร้าง)
+      if (req.user.role === "veterinarian") {
+        try {
+          const [{ data: petData }, { data: vetData }] = await Promise.all([
+            supabase.from("pets").select("user_id, name").eq("id", req.params.petId).single(),
+            supabase.from("users").select("full_name").eq("id", req.user.id).single()
+          ])
+
+          if (petData && vetData) {
+            console.log('[Health Record Created] Notifying user:', petData.user_id);
+            await notifyHealthRecordUpdated(petData.user_id, {
+              id: data.id,
+              pet_id: req.params.petId,
+              pet_name: petData.name,
+              vet_name: vetData.full_name,
+              diagnosis: data.diagnosis || 'ตรวจสุขภาพทั่วไป',
+              visit_date: data.visit_date
+            })
+          }
+        } catch (notificationError) {
+          console.error("Failed to send health record notification:", notificationError)
+        }
       }
 
       res.status(201).json(data)

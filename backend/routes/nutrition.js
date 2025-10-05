@@ -3,6 +3,7 @@ const { supabase } = require("../config/supabase")
 const { validationRules, validateRequest } = require("../middleware/validation")
 const { authenticateToken, requireRole } = require("../middleware/auth")
 const { body } = require("express-validator")
+const { notifyNutritionPlanCreated } = require("../services/notificationService")
 
 const router = express.Router()
 
@@ -136,10 +137,10 @@ router.post(
         return res.status(404).json({ error: "Pet not found", code: "PET_NOT_FOUND" })
       }
 
-      const recommendationData = {
-        ...req.body,
+    const recommendationData = {
+      ...req.body,
         veterinarian_id: req.user.id,
-      }
+    }
 
       const { data, error } = await supabase
         .from("pet_nutrition_plans")
@@ -154,14 +155,35 @@ router.post(
         })
       }
 
+      // ส่งการแจ้งเตือนถึงเจ้าของสัตว์เลี้ยง
+      try {
+        const [{ data: petData }, { data: vetData }] = await Promise.all([
+          supabase.from("pets").select("user_id, name").eq("id", data.pet_id).single(),
+          supabase.from("users").select("full_name").eq("id", req.user.id).single()
+        ])
+
+        if (petData && vetData) {
+          console.log('[Nutrition Plan Created] Notifying user:', petData.user_id);
+          await notifyNutritionPlanCreated(petData.user_id, {
+            id: data.id,
+            pet_id: data.pet_id,
+            pet_name: petData.name,
+            vet_name: vetData.full_name,
+            custom_instructions: data.custom_instructions
+          })
+        }
+      } catch (notificationError) {
+        console.error("Failed to send nutrition plan notification:", notificationError)
+      }
+
       res.status(201).json(data)
-    } catch (error) {
-      console.error("Recommendation creation error:", error)
-      res.status(500).json({
-        error: "Failed to create nutrition recommendation",
-        code: "INTERNAL_ERROR",
-      })
-    }
+  } catch (error) {
+    console.error("Recommendation creation error:", error)
+    res.status(500).json({
+      error: "Failed to create nutrition recommendation",
+      code: "INTERNAL_ERROR",
+    })
+  }
   }
 )
 
@@ -338,28 +360,28 @@ router.delete(
         })
       }
 
-      const { error } = await supabase
-        .from("pet_nutrition_plans")
-        .delete()
-        .eq("id", req.params.id)
+    const { error } = await supabase
+      .from("pet_nutrition_plans")
+      .delete()
+      .eq("id", req.params.id)
 
-      if (error) {
+    if (error) {
         console.error('[BE] Delete error:', error)
-        return res.status(400).json({
-          error: error.message,
-          code: "RECOMMENDATION_DELETION_FAILED",
-        })
-      }
-
-      console.log('[BE] Successfully deleted plan')
-      res.status(204).send()
-    } catch (error) {
-      console.error("Recommendation deletion error:", error)
-      res.status(500).json({
-        error: "Failed to delete nutrition recommendation",
-        code: "INTERNAL_ERROR",
+      return res.status(400).json({
+        error: error.message,
+        code: "RECOMMENDATION_DELETION_FAILED",
       })
     }
+
+      console.log('[BE] Successfully deleted plan')
+    res.status(204).send()
+  } catch (error) {
+    console.error("Recommendation deletion error:", error)
+    res.status(500).json({
+      error: "Failed to delete nutrition recommendation",
+      code: "INTERNAL_ERROR",
+    })
+  }
   }
 )
 

@@ -26,6 +26,88 @@ function formatThaiDate(dateString) {
 // ==================== USER NOTIFICATIONS ====================
 
 /**
+ * แจ้งเตือนผู้ใช้เมื่อ Vet สร้างแผนโภชนาการให้
+ */
+async function notifyNutritionPlanCreated(userId, nutritionData) {
+  console.log('[notifyNutritionPlanCreated] Called with userId:', userId, 'nutritionData:', nutritionData);
+
+  const notification = {
+    user_id: userId,
+    pet_id: nutritionData.pet_id || null,
+    notification_type: 'appointment_reminder', // ใช้ enum ที่มีอยู่
+    title: 'แผนโภชนาการใหม่',
+    message: `สัตวแพทย์ ${nutritionData.vet_name} ได้สร้างแผนโภชนาการสำหรับ ${nutritionData.pet_name}`,
+    priority: 'medium',
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('[notifyNutritionPlanCreated] Database error:', error);
+    return { data, error };
+  }
+
+  if (data) {
+    console.log('[notifyNutritionPlanCreated] Notification saved to DB:', data.id);
+    console.log('[notifyNutritionPlanCreated] Emitting to user:', userId);
+
+    emitToUser(userId, 'notification:nutrition_plan', {
+      ...data,
+      nutrition_plan: nutritionData
+    });
+  }
+
+  return { data, error };
+}
+
+/**
+ * แจ้งเตือนผู้ใช้เมื่อ Vet อัปเดตบันทึกสุขภาพ
+ */
+async function notifyHealthRecordUpdated(userId, healthRecordData) {
+  console.log('[notifyHealthRecordUpdated] Called with userId:', userId, 'healthRecordData:', healthRecordData);
+
+  const notification = {
+    user_id: userId,
+    pet_id: healthRecordData.pet_id || null,
+    notification_type: 'appointment_reminder', // ใช้ enum ที่มีอยู่
+    title: 'บันทึกสุขภาพอัปเดต',
+    message: `สัตวแพทย์ ${healthRecordData.vet_name} ได้อัปเดตบันทึกสุขภาพของ ${healthRecordData.pet_name}`,
+    priority: 'medium',
+    is_read: false,
+    is_completed: false
+  };
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notification)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('[notifyHealthRecordUpdated] Database error:', error);
+    return { data, error };
+  }
+
+  if (data) {
+    console.log('[notifyHealthRecordUpdated] Notification saved to DB:', data.id);
+    console.log('[notifyHealthRecordUpdated] Emitting to user:', userId);
+
+    emitToUser(userId, 'notification:health_record', {
+      ...data,
+      health_record: healthRecordData
+    });
+  }
+
+  return { data, error };
+}
+
+/**
  * แจ้งเตือนผู้ใช้เมื่อสถานะนัดหมายเปลี่ยน
  */
 async function notifyAppointmentStatusChanged(userId, appointmentData) {

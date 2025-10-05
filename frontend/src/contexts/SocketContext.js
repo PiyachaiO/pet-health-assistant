@@ -125,6 +125,7 @@ export const SocketProvider = ({ children }) => {
     socketInstance.on('notification:health_record', (data) => {
       console.log('📬 Health record notification:', data);
       addNotification(data);
+      showToast('บันทึกสุขภาพอัปเดต', data.message);
     });
 
     // Vaccination reminder
