@@ -30,7 +30,7 @@ function formatThaiDate(dateString) {
  * NOTE: ต้องเพิ่ม 'nutrition_plan_created' ใน notification_type enum ก่อน
  */
 async function notifyNutritionPlanCreated(userId, nutritionData) {
-  console.log('[notifyNutritionPlanCreated] Called with userId:', userId, 'nutritionData:', nutritionData);
+  console.log('[notifyNutritionPlanCreated] ✅ NEW VERSION - Called with userId:', userId, 'nutritionData:', nutritionData);
 
   const notification = {
     user_id: userId,
