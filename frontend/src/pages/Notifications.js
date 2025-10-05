@@ -101,6 +101,11 @@ const Notifications = () => {
   })
 
   const getNotificationIcon = (notification) => {
+    // ไอคอนพิเศษสำหรับ article_published
+    if (notification.notification_type === "article_published") {
+      return <FileText className="h-5 w-5 text-purple-500" />
+    }
+
     // สำหรับสัตวแพทย์: แสดงไอคอนตามประเภทการแจ้งเตือน
     if (user?.role === "veterinarian") {
       switch (notification.notification_type) {
@@ -132,12 +137,9 @@ const Notifications = () => {
   }
 
   const getNotificationTypeText = (type, title) => {
-    // ถ้า title เป็น "บทความใหม่!" แสดงว่าเป็น article notification
-    if (title?.includes("บทความใหม่")) {
-      return "บทความใหม่"
-    }
-    
     switch (type) {
+      case "article_published":
+        return "บทความใหม่"
       case "appointment_reminder":
         return "เตือนนัดหมาย"
       case "vaccination_due":

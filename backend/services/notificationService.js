@@ -643,7 +643,7 @@ async function notifyAllNewArticlePublished(articleData) {
     const notifications = users.map(user => ({
       user_id: user.id,
       pet_id: null,
-      notification_type: 'appointment_reminder', // ใช้ enum ที่มีอยู่แล้ว (ไม่มี article_published ใน database)
+      notification_type: 'article_published', // ✅ ใช้ enum ที่เพิ่มใหม่แล้ว
       title: 'บทความใหม่!',
       message: `มีบทความใหม่: "${articleData.title}"`,
       priority: 'low',
