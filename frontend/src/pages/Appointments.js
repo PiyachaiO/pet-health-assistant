@@ -392,7 +392,11 @@ const Appointments = () => {
 
       {/* Book Appointment Modal */}
       {showBookModal && (
-        <BookAppointmentModal onClose={() => setShowBookModal(false)} onAppointmentBooked={handleAppointmentBooked} />
+        <BookAppointmentModal 
+          onClose={() => setShowBookModal(false)} 
+          onAppointmentBooked={handleAppointmentBooked}
+          currentUser={user}
+        />
       )}
 
       {/* Appointment Detail Modal */}

@@ -552,7 +552,7 @@ router.get("/statistics", async (req, res) => {
 // Get all users (admin only)
 router.get("/users", async (req, res) => {
   try {
-    const { data, error } = await supabase
+    const { data, error} = await supabase
       .from("users")
       .select("*")
       .order("created_at", { ascending: false })
@@ -569,6 +569,32 @@ router.get("/users", async (req, res) => {
     console.error("Users fetch error:", error)
     res.status(500).json({
       error: "Failed to fetch users",
+      code: "INTERNAL_ERROR",
+    })
+  }
+})
+
+// Get user's pets (for vets to book appointment)
+router.get("/users/:userId/pets", validationRules.uuidParam("userId"), validateRequest, async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("pets")
+      .select("*")
+      .eq("user_id", req.params.userId)
+      .order("name", { ascending: true })
+
+    if (error) {
+      return res.status(400).json({
+        error: error.message,
+        code: "PETS_FETCH_FAILED",
+      })
+    }
+
+    res.json(data)
+  } catch (error) {
+    console.error("User pets fetch error:", error)
+    res.status(500).json({
+      error: "Failed to fetch user's pets",
       code: "INTERNAL_ERROR",
     })
   }

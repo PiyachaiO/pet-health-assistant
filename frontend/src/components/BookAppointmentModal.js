@@ -4,10 +4,11 @@ import { useState, useEffect } from "react"
 import apiClient from "../services/api"
 import { X } from "lucide-react"
 
-const BookAppointmentModal = ({ onClose, onAppointmentBooked }) => {
+const BookAppointmentModal = ({ onClose, onAppointmentBooked, currentUser }) => {
   const [formData, setFormData] = useState({
     pet_id: "",
     veterinarian_id: "",
+    user_id: "", // เพิ่ม user_id สำหรับ Vet
     appointment_date: "",
     appointment_time: "",
     appointment_type: "",
@@ -15,9 +16,11 @@ const BookAppointmentModal = ({ onClose, onAppointmentBooked }) => {
   })
   const [pets, setPets] = useState([])
   const [veterinarians, setVeterinarians] = useState([])
+  const [users, setUsers] = useState([]) // เพิ่ม users list สำหรับ Vet
   const [loading, setLoading] = useState(false)
   const [dataLoading, setDataLoading] = useState(true)
   const [error, setError] = useState("")
+  const isVet = currentUser?.role === "veterinarian"
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -57,26 +60,43 @@ const BookAppointmentModal = ({ onClose, onAppointmentBooked }) => {
       console.log(`Fetching pets and veterinarians... (attempt ${retryCount + 1})`);
       
       // แยก API calls เพื่อให้ง่ายต่อการ debug
-      let petsResponse, vetsResponse;
+      let petsResponse, vetsResponse, usersResponse;
       
-      try {
-        petsResponse = await apiClient.get("/pets");
-        console.log("Pets response:", petsResponse.data);
-      } catch (petsError) {
-        console.error("Pets fetch error:", petsError);
-        throw petsError;
+      if (isVet) {
+        // ถ้าเป็น Vet: ดึง users list และ pets ทั้งหมด (admin endpoint)
+        try {
+          usersResponse = await apiClient.get("/admin/users");
+          console.log("Users response:", usersResponse.data);
+          setUsers(usersResponse.data.filter(u => u.role === 'user' && u.is_active) || []);
+        } catch (usersError) {
+          console.error("Users fetch error:", usersError);
+          throw usersError;
+        }
+        
+        // Vet ไม่ต้องเลือก veterinarian เพราะเป็นตัวเอง
+        setVeterinarians([]);
+        setPets([]); // จะโหลด pets หลังเลือก user
+      } else {
+        // ถ้าเป็น User: ดึง pets ของตัวเอง และ veterinarians
+        try {
+          petsResponse = await apiClient.get("/pets");
+          console.log("Pets response:", petsResponse.data);
+          setPets(petsResponse.data || []);
+        } catch (petsError) {
+          console.error("Pets fetch error:", petsError);
+          throw petsError;
+        }
+        
+        try {
+          vetsResponse = await apiClient.get("/users/veterinarians");
+          console.log("Vets response:", vetsResponse.data);
+          setVeterinarians(vetsResponse.data.veterinarians || []);
+        } catch (vetsError) {
+          console.error("Vets fetch error:", vetsError);
+          throw vetsError;
+        }
       }
       
-      try {
-        vetsResponse = await apiClient.get("/users/veterinarians");
-        console.log("Vets response:", vetsResponse.data);
-      } catch (vetsError) {
-        console.error("Vets fetch error:", vetsError);
-        throw vetsError;
-      }
-      
-      setPets(petsResponse.data || [])
-      setVeterinarians(vetsResponse.data.veterinarians || [])
       setDataLoading(false);
     } catch (error) {
       console.error("Failed to fetch data:", error)
@@ -99,11 +119,26 @@ const BookAppointmentModal = ({ onClose, onAppointmentBooked }) => {
     }
   }
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
+    const { name, value } = e.target;
+    
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
-    })
+      [name]: value,
+    });
+
+    // ถ้าเป็น Vet และเลือก user_id ให้โหลด pets ของ user นั้น
+    if (isVet && name === "user_id" && value) {
+      try {
+        const response = await apiClient.get(`/admin/users/${value}/pets`);
+        setPets(response.data || []);
+        // Reset pet_id เมื่อเปลี่ยน user
+        setFormData(prev => ({ ...prev, pet_id: "" }));
+      } catch (error) {
+        console.error("Failed to fetch user's pets:", error);
+        setPets([]);
+      }
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -113,15 +148,18 @@ const BookAppointmentModal = ({ onClose, onAppointmentBooked }) => {
 
     try {
       // ตรวจสอบข้อมูลที่จำเป็น
-      if (
-        !formData.pet_id ||
-        !formData.veterinarian_id ||
-        !formData.appointment_date ||
-        !formData.appointment_time ||
-        !formData.appointment_type
-      ) {
-        setError("กรุณากรอกข้อมูลให้ครบถ้วน")
-        return
+      if (isVet) {
+        // Vet ต้องระบุ user_id
+        if (!formData.user_id || !formData.pet_id || !formData.appointment_date || !formData.appointment_time || !formData.appointment_type) {
+          setError("กรุณากรอกข้อมูลให้ครบถ้วน")
+          return
+        }
+      } else {
+        // User ต้องระบุ veterinarian_id
+        if (!formData.pet_id || !formData.veterinarian_id || !formData.appointment_date || !formData.appointment_time || !formData.appointment_type) {
+          setError("กรุณากรอกข้อมูลให้ครบถ้วน")
+          return
+        }
       }
 
       const appointmentDateTime = new Date(`${formData.appointment_date}T${formData.appointment_time}`)
@@ -132,13 +170,21 @@ const BookAppointmentModal = ({ onClose, onAppointmentBooked }) => {
         return
       }
 
-      const response = await apiClient.post("/appointments", {
+      const payload = {
         pet_id: formData.pet_id,
-        veterinarian_id: formData.veterinarian_id,
         appointment_date: appointmentDateTime.toISOString(),
         appointment_type: formData.appointment_type,
         notes: formData.notes,
-      })
+      };
+
+      // เพิ่ม user_id หรือ veterinarian_id ตาม role
+      if (isVet) {
+        payload.user_id = formData.user_id;
+      } else {
+        payload.veterinarian_id = formData.veterinarian_id;
+      }
+
+      const response = await apiClient.post("/appointments", payload)
 
       onAppointmentBooked(response.data)
     } catch (error) {
@@ -186,6 +232,32 @@ const BookAppointmentModal = ({ onClose, onAppointmentBooked }) => {
             </div>
           )}
 
+          {isVet && (
+            <div>
+              <label htmlFor="user_id" className="block text-sm font-medium text-gray-700 mb-1">
+                เลือกลูกค้าที่ทำการจองให้ *
+              </label>
+              <select
+                id="user_id"
+                name="user_id"
+                required
+                disabled={dataLoading}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                value={formData.user_id}
+                onChange={handleChange}
+              >
+                <option value="">
+                  {dataLoading ? "กำลังโหลด..." : "เลือกลูกค้า"}
+                </option>
+                {users.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.full_name} - {user.email}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <div>
             <label htmlFor="pet_id" className="block text-sm font-medium text-gray-700 mb-1">
               เลือกสัตว์เลี้ยง *
@@ -194,45 +266,47 @@ const BookAppointmentModal = ({ onClose, onAppointmentBooked }) => {
               id="pet_id"
               name="pet_id"
               required
-              disabled={dataLoading}
+              disabled={dataLoading || (isVet && !formData.user_id)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               value={formData.pet_id}
               onChange={handleChange}
             >
               <option value="">
-                {dataLoading ? "กำลังโหลด..." : "เลือกสัตว์เลี้ยง"}
+                {dataLoading ? "กำลังโหลด..." : isVet && !formData.user_id ? "กรุณาเลือกลูกค้าก่อน" : "เลือกสัตว์เลี้ยง"}
               </option>
               {pets.map((pet) => (
                 <option key={pet.id} value={pet.id}>
-                  {pet.name} ({pet.species_name}) - {pet.users?.full_name || 'ไม่ระบุเจ้าของ'}
+                  {pet.name} ({pet.species})
                 </option>
               ))}
             </select>
           </div>
 
-          <div>
-            <label htmlFor="veterinarian_id" className="block text-sm font-medium text-gray-700 mb-1">
-              เลือกสัตวแพทย์ *
-            </label>
-            <select
-              id="veterinarian_id"
-              name="veterinarian_id"
-              required
-              disabled={dataLoading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-              value={formData.veterinarian_id}
-              onChange={handleChange}
-            >
-              <option value="">
-                {dataLoading ? "กำลังโหลด..." : "เลือกสัตวแพทย์"}
-              </option>
-              {veterinarians.map((vet) => (
-                <option key={vet.id} value={vet.id}>
-                  {vet.full_name}
+          {!isVet && (
+            <div>
+              <label htmlFor="veterinarian_id" className="block text-sm font-medium text-gray-700 mb-1">
+                เลือกสัตวแพทย์ *
+              </label>
+              <select
+                id="veterinarian_id"
+                name="veterinarian_id"
+                required
+                disabled={dataLoading}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                value={formData.veterinarian_id}
+                onChange={handleChange}
+              >
+                <option value="">
+                  {dataLoading ? "กำลังโหลด..." : "เลือกสัตวแพทย์"}
                 </option>
-              ))}
-            </select>
-          </div>
+                {veterinarians.map((vet) => (
+                  <option key={vet.id} value={vet.id}>
+                    {vet.full_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div>
             <label htmlFor="appointment_type" className="block text-sm font-medium text-gray-700 mb-1">

@@ -141,6 +141,8 @@ const Notifications = () => {
         return "เตือนให้ยา"
       case "checkup_due":
         return "ถึงกำหนดตรวจสุขภาพ"
+      case "article_published":
+        return "บทความใหม่"
       default:
         return type
     }
@@ -291,7 +293,13 @@ const Notifications = () => {
                           {notification.due_date && (
                             <span>กำหนด: {new Date(notification.due_date).toLocaleDateString("th-TH")}</span>
                           )}
-                          <span>{new Date(notification.created_at).toLocaleDateString("th-TH")}</span>
+                          <span>
+                            {new Date(notification.created_at).toLocaleDateString("th-TH", {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </span>
                         </div>
                       </div>
 
