@@ -82,6 +82,17 @@ const ArticleDetail = () => {
           {article.excerpt && <p className="text-xl text-gray-600 leading-relaxed">{article.excerpt}</p>}
         </div>
 
+        {/* Featured Image */}
+        {article.featured_image_url && (
+          <div className="mb-8">
+            <img 
+              src={article.featured_image_url} 
+              alt={article.title}
+              className="w-full h-auto rounded-xl shadow-md object-cover max-h-[500px]"
+            />
+          </div>
+        )}
+
         {/* Article Content */}
         <div className="bg-white rounded-xl shadow-md p-8">
           <div className="prose prose-lg max-w-none">

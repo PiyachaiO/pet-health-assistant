@@ -157,7 +157,7 @@ router.post("/", validationRules.articleCreation, validateRequest, async (req, r
     const articleData = {
       ...req.body,
       author_id: req.user.id,
-      status: 'published', // Auto-publish เมื่อสร้าง (ถ้าเป็น Admin)
+      is_published: req.user.role === 'admin', // Auto-publish เมื่อสร้าง (ถ้าเป็น Admin)
       published_at: req.user.role === 'admin' ? new Date().toISOString() : null
     }
 
@@ -175,7 +175,7 @@ router.post("/", validationRules.articleCreation, validateRequest, async (req, r
     }
 
     // ส่งการแจ้งเตือนเมื่อ Admin สร้างบทความ (auto-publish)
-    if (req.user.role === 'admin' && data.status === 'published') {
+    if (req.user.role === 'admin' && data.is_published) {
       try {
         console.log('[Article Created & Published] Sending notification to all users for article:', data.id);
         await notifyAllNewArticlePublished({
@@ -249,7 +249,7 @@ router.patch("/:id/publish", validationRules.uuidParam("id"), validateRequest, a
     const { data, error } = await supabase
       .from("articles")
       .update({ 
-        status: "published",
+        is_published: true,
         published_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
