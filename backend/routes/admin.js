@@ -19,11 +19,19 @@ const requireAdmin = (req, res, next) => {
   next()
 }
 
-// Apply admin authorization to all routes
-router.use(requireAdmin)
+// Admin or Vet authorization middleware
+const requireAdminOrVet = (req, res, next) => {
+  if (req.user.role !== "admin" && req.user.role !== "veterinarian") {
+    return res.status(403).json({
+      error: "Access denied. Admin or Veterinarian role required.",
+      code: "ACCESS_DENIED",
+    })
+  }
+  next()
+}
 
-// Migration endpoint for adding missing columns
-router.post("/migrate-users", async (req, res) => {
+// Migration endpoint for adding missing columns (admin only)
+router.post("/migrate-users", requireAdmin, async (req, res) => {
   try {
     console.log("Starting users table migration...")
     
@@ -66,7 +74,7 @@ router.post("/migrate-users", async (req, res) => {
 })
 
 // Get pending approvals
-router.get("/pending-approvals", async (req, res) => {
+router.get("/pending-approvals", requireAdmin, async (req, res) => {
   try {
     // Get pending appointments
     const { data: appointments, error: appointmentsError } = await supabase
@@ -136,7 +144,7 @@ router.get("/pending-approvals", async (req, res) => {
 })
 
 // Approve appointment
-router.patch("/appointments/:id/approve", validationRules.uuidParam("id"), validateRequest, async (req, res) => {
+router.patch("/appointments/:id/approve", requireAdmin, validationRules.uuidParam("id"), validateRequest, async (req, res) => {
   try {
     const { action, rejection_reason } = req.body
 
@@ -209,7 +217,7 @@ router.patch("/appointments/:id/approve", validationRules.uuidParam("id"), valid
 })
 
 // Reject appointment
-router.patch("/appointments/:id/reject", validationRules.uuidParam("id"), validateRequest, async (req, res) => {
+router.patch("/appointments/:id/reject", requireAdmin, validationRules.uuidParam("id"), validateRequest, async (req, res) => {
   try {
     const { data, error } = await supabase
       .from("appointments")
@@ -250,7 +258,7 @@ router.patch("/appointments/:id/reject", validationRules.uuidParam("id"), valida
 })
 
 // Approve nutrition guideline
-router.patch("/nutrition-guidelines/:id/approve", validationRules.uuidParam("id"), validateRequest, async (req, res) => {
+router.patch("/nutrition-guidelines/:id/approve", requireAdmin, validationRules.uuidParam("id"), validateRequest, async (req, res) => {
   try {
     const { action, rejection_reason } = req.body
 
@@ -317,7 +325,7 @@ router.patch("/nutrition-guidelines/:id/approve", validationRules.uuidParam("id"
 })
 
 // Reject nutrition guideline
-router.patch("/nutrition-guidelines/:id/reject", validationRules.uuidParam("id"), validateRequest, async (req, res) => {
+router.patch("/nutrition-guidelines/:id/reject", requireAdmin, validationRules.uuidParam("id"), validateRequest, async (req, res) => {
   try {
     const { data, error } = await supabase
       .from("nutrition_guidelines")
@@ -353,7 +361,7 @@ router.patch("/nutrition-guidelines/:id/reject", validationRules.uuidParam("id")
 })
 
 // Get system statistics
-router.get("/statistics", async (req, res) => {
+router.get("/statistics", requireAdmin, async (req, res) => {
   try {
     // Get user statistics
     const { count: totalUsers, error: usersError } = await supabase
@@ -549,8 +557,8 @@ router.get("/statistics", async (req, res) => {
   }
 })
 
-// Get all users (admin only)
-router.get("/users", async (req, res) => {
+// Get all users (admin or vet can access)
+router.get("/users", requireAdminOrVet, async (req, res) => {
   try {
     const { data, error} = await supabase
       .from("users")
@@ -575,7 +583,7 @@ router.get("/users", async (req, res) => {
 })
 
 // Get user's pets (for vets to book appointment)
-router.get("/users/:userId/pets", validationRules.uuidParam("userId"), validateRequest, async (req, res) => {
+router.get("/users/:userId/pets", requireAdminOrVet, validationRules.uuidParam("userId"), validateRequest, async (req, res) => {
   try {
     const { data, error } = await supabase
       .from("pets")
@@ -601,7 +609,7 @@ router.get("/users/:userId/pets", validationRules.uuidParam("userId"), validateR
 })
 
 // Update user role
-router.patch("/users/:id/role", validationRules.uuidParam("id"), validateRequest, async (req, res) => {
+router.patch("/users/:id/role", requireAdmin, validationRules.uuidParam("id"), validateRequest, async (req, res) => {
   try {
     const { role } = req.body
 
@@ -643,7 +651,7 @@ router.patch("/users/:id/role", validationRules.uuidParam("id"), validateRequest
 })
 
 // Update user status (active/inactive)
-router.patch("/users/:id/status", validationRules.uuidParam("id"), validateRequest, async (req, res) => {
+router.patch("/users/:id/status", requireAdmin, validationRules.uuidParam("id"), validateRequest, async (req, res) => {
   try {
     console.log("=== User Status Update Debug ===")
     console.log("User ID:", req.params.id)

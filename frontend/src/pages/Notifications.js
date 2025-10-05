@@ -287,20 +287,6 @@ const Notifications = () => {
                           {notification.title}
                         </h4>
                         <p className="text-gray-600 mt-1">{notification.message}</p>
-
-                        <div className="flex items-center space-x-4 mt-3 text-sm text-gray-500">
-                          <span>ประเภท: {getNotificationTypeText(notification.notification_type)}</span>
-                          {notification.due_date && (
-                            <span>กำหนด: {new Date(notification.due_date).toLocaleDateString("th-TH")}</span>
-                          )}
-                          <span>
-                            {new Date(notification.created_at).toLocaleDateString("th-TH", {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric'
-                            })}
-                          </span>
-                        </div>
                       </div>
 
                       <div className="flex items-center space-x-2 ml-4">
