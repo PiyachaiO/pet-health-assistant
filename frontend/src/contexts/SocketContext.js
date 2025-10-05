@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
+import { playNotificationSound, playUrgentSound } from '../../public/sounds/notification-sound';
 
 const SocketContext = createContext(null);
 
@@ -285,6 +286,17 @@ export const SocketProvider = ({ children }) => {
   // Show toast notification using react-hot-toast
   const showToast = (title, message, type = 'info') => {
     console.log(`🔔 [${type.toUpperCase()}] ${title}: ${message}`);
+    
+    // Play notification sound based on type
+    try {
+      if (type === 'error') {
+        playUrgentSound(); // Double beep for errors
+      } else {
+        playNotificationSound(type); // Single beep for others
+      }
+    } catch (error) {
+      console.warn('Could not play notification sound:', error);
+    }
     
     const toastMessage = (
       <div>

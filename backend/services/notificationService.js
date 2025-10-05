@@ -557,13 +557,21 @@ async function notifyAdminUserReport(reportData) {
 /**
  * แจ้งเตือนทุกคนเมื่อมีบทความใหม่
  */
-async function notifyAllNewArticle(articleData) {
+async function notifyAllNewArticlePublished(articleData) {
+  console.log('[notifyAllNewArticlePublished] Broadcasting new article:', articleData.title);
+  
+  // Send real-time notification to all connected users
   emitToAll('notification:new_article', {
-    title: 'บทความใหม่',
+    id: articleData.id,
+    type: 'global_article',
+    title: 'บทความใหม่!',
     message: `มีบทความใหม่: "${articleData.title}"`,
     article: articleData,
-    timestamp: new Date().toISOString()
+    is_read: false,
+    created_at: new Date().toISOString()
   });
+  
+  console.log('[notifyAllNewArticlePublished] ✅ Broadcast sent to all users');
 }
 
 /**
@@ -604,7 +612,7 @@ module.exports = {
   notifyAdminUserReport,
 
   // Broadcast notifications
-  notifyAllNewArticle,
+  notifyAllNewArticlePublished,
   notifyAllAnnouncement
 };
 

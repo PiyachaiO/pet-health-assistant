@@ -2,6 +2,7 @@ const express = require("express")
 const { supabase } = require("../config/supabase")
 const { validationRules, validateRequest } = require("../middleware/validation")
 const { authenticateToken } = require("../middleware/auth")
+const { notifyAllNewArticlePublished } = require("../services/notificationService")
 
 const router = express.Router()
 
@@ -245,6 +246,20 @@ router.patch("/:id/publish", validationRules.uuidParam("id"), validateRequest, a
         error: error.message,
         code: "ARTICLE_PUBLISH_FAILED",
       })
+    }
+
+    // Send notification to all users about new published article
+    try {
+      console.log('[Article Published] Sending notification to all users for article:', data.id);
+      await notifyAllNewArticlePublished({
+        id: data.id,
+        title: data.title,
+        author_id: data.author_id,
+        category: data.category
+      });
+    } catch (notificationError) {
+      console.error('[Article Published] Failed to send notification:', notificationError);
+      // Don't fail the publish if notification fails
     }
 
     res.json(data)
