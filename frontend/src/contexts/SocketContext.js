@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import toast from 'react-hot-toast';
 
 const SocketContext = createContext(null);
 
@@ -273,24 +274,55 @@ export const SocketProvider = ({ children }) => {
     setUnreadCount(0);
   }, []);
 
-  // Show toast notification (can be replaced with your toast library)
+  // Show toast notification using react-hot-toast
   const showToast = (title, message, type = 'info') => {
-    // TODO: Integrate with your toast notification library
-    // For now, using simple console.log
     console.log(`🔔 [${type.toUpperCase()}] ${title}: ${message}`);
     
-    // You can use libraries like:
-    // - react-hot-toast
-    // - react-toastify
-    // - sonner (from shadcn)
-    
-    // Example with browser notification (if permitted):
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-      new Notification(title, {
-        body: message,
-        icon: '/placeholder-logo.png',
-        badge: '/placeholder-logo.png',
-      });
+    const toastMessage = (
+      <div>
+        <strong>{title}</strong>
+        <p className="text-sm">{message}</p>
+      </div>
+    );
+
+    switch (type) {
+      case 'success':
+        toast.success(toastMessage, {
+          duration: 5000,
+          position: 'top-right',
+          icon: '✅',
+        });
+        break;
+      case 'error':
+        toast.error(toastMessage, {
+          duration: 6000,
+          position: 'top-right',
+          icon: '❌',
+        });
+        break;
+      case 'warning':
+        toast(toastMessage, {
+          duration: 5000,
+          position: 'top-right',
+          icon: '⚠️',
+          style: {
+            background: '#FEF3C7',
+            color: '#92400E',
+          },
+        });
+        break;
+      case 'info':
+      default:
+        toast(toastMessage, {
+          duration: 5000,
+          position: 'top-right',
+          icon: '📢',
+          style: {
+            background: '#DBEAFE',
+            color: '#1E40AF',
+          },
+        });
+        break;
     }
   };
 

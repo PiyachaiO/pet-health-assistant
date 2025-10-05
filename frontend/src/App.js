@@ -23,11 +23,13 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { SocketProvider } from './contexts/SocketContext';
 import Navbar from './components/Navbar';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <AuthProvider>
       <SocketProvider>
+        <Toaster />
         <Router>
           <Navbar />
           <div className="container mx-auto mt-4">
