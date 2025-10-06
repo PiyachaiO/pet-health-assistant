@@ -9,9 +9,9 @@ const Home = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 py-24 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-green-100 via-blue-100 to-purple-100 py-24 overflow-hidden">
         {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-10 w-32 h-32 bg-green-500 rounded-full"></div>
           <div className="absolute top-40 right-20 w-24 h-24 bg-blue-500 rounded-full"></div>
           <div className="absolute bottom-20 left-1/4 w-16 h-16 bg-purple-500 rounded-full"></div>
@@ -20,7 +20,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center">
             <div className="mb-8">
-              <span className="inline-flex items-center px-6 py-3 rounded-full text-sm font-medium bg-white/80 backdrop-blur-sm text-green-800 shadow-lg border border-green-200">
+              <span className="inline-flex items-center px-6 py-3 rounded-full text-sm font-medium bg-white/90 backdrop-blur-sm text-green-800 shadow-lg border border-green-300">
                 🐾 ระบบดูแลสุขภาพสัตว์เลี้ยงที่ครบครัน
               </span>
             </div>
@@ -77,7 +77,7 @@ const Home = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-gradient-to-b from-white to-gray-50">
+      <section className="py-24 bg-gradient-to-b from-white to-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">ฟีเจอร์เด่นที่จะช่วยคุณ</h2>
@@ -136,74 +136,12 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-24 bg-gradient-to-br from-green-50 to-blue-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">เสียงตอบรับจากผู้ใช้</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">ความพึงพอใจของเจ้าของสัตว์เลี้ยงที่ไว้วางใจเรา</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-3xl p-8 shadow-xl">
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                  <Users className="h-6 w-6 text-green-500" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900">คุณสมชาย</h4>
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <p className="text-gray-600 leading-relaxed">"ระบบแจ้งเตือนช่วยให้ไม่พลาดการฉีดวัคซีนของน้องหมา ใช้งานง่ายมาก"</p>
-            </div>
-
-            <div className="bg-white rounded-3xl p-8 shadow-xl">
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                  <Calendar className="h-6 w-6 text-blue-500" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900">คุณสมหญิง</h4>
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <p className="text-gray-600 leading-relaxed">"จองนัดหมายกับสัตวแพทย์สะดวกมาก บันทึกสุขภาพครบถ้วน"</p>
-            </div>
-
-            <div className="bg-white rounded-3xl p-8 shadow-xl">
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
-                  <MessageCircle className="h-6 w-6 text-purple-500" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900">คุณสมศักดิ์</h4>
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <p className="text-gray-600 leading-relaxed">"คำแนะนำโภชนาการจากสัตวแพทย์ช่วยให้น้องแมวสุขภาพดีขึ้น"</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
 
       {/* CTA Section */}
       <section className="relative py-24 bg-gradient-to-r from-green-500 via-green-600 to-blue-600 overflow-hidden">
         {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 opacity-15">
           <div className="absolute top-10 left-10 w-20 h-20 bg-white rounded-full"></div>
           <div className="absolute top-20 right-20 w-16 h-16 bg-white rounded-full"></div>
           <div className="absolute bottom-10 left-1/3 w-12 h-12 bg-white rounded-full"></div>
