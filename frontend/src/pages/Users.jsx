@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../services/api';
-import { Users as UsersIcon, Plus, Edit, Trash2, UserCheck, UserX, Search, Filter } from 'lucide-react';
+import { Users as UsersIcon, Search, Filter, TrendingUp } from 'lucide-react';
 
 const Users = () => {
   const { user } = useAuth();
@@ -11,6 +11,8 @@ const Users = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [sortKey, setSortKey] = useState('created_at'); // created_at | last_login | name
+  const [sortDir, setSortDir] = useState('desc'); // asc | desc
 
 
   // Function to fetch all users from the API
@@ -57,6 +59,33 @@ const Users = () => {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
+  // Sort users
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    let av, bv;
+    if (sortKey === 'created_at') {
+      av = new Date(a.created_at).getTime();
+      bv = new Date(b.created_at).getTime();
+    } else if (sortKey === 'last_login') {
+      av = a.last_login ? new Date(a.last_login).getTime() : 0;
+      bv = b.last_login ? new Date(b.last_login).getTime() : 0;
+    } else {
+      av = (a.full_name || '').toLowerCase();
+      bv = (b.full_name || '').toLowerCase();
+    }
+    if (av === bv) return 0;
+    const result = av > bv ? 1 : -1;
+    return sortDir === 'asc' ? result : -1 * result;
+  });
+
+  const toggleSort = (key) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortDir('desc')
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -72,6 +101,38 @@ const Users = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">จัดการผู้ใช้งาน</h1>
           <p className="text-gray-600 mt-2">จัดการข้อมูลผู้ใช้งานในระบบ</p>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">ผู้ใช้งานทั้งหมด</p>
+              <p className="text-2xl font-semibold text-gray-900">{users.length}</p>
+            </div>
+            <UsersIcon className="h-6 w-6 text-blue-600" />
+          </div>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">ใช้งานอยู่</p>
+              <p className="text-2xl font-semibold text-gray-900">{users.filter(u => u.is_active).length}</p>
+            </div>
+            <TrendingUp className="h-6 w-6 text-green-600" />
+          </div>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">สัตวแพทย์</p>
+              <p className="text-2xl font-semibold text-gray-900">{users.filter(u => u.role === 'veterinarian').length}</p>
+            </div>
+            <span className="text-blue-600 text-xl">🐾</span>
+          </div>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">แอดมิน</p>
+              <p className="text-2xl font-semibold text-gray-900">{users.filter(u => u.role === 'admin').length}</p>
+            </div>
+            <span className="text-purple-600 text-xl">🛡️</span>
+          </div>
         </div>
 
         {/* Search and Filters */}
@@ -114,6 +175,12 @@ const Users = () => {
               <option value="active">ใช้งาน</option>
               <option value="inactive">ระงับ</option>
             </select>
+
+            {/* Reset */}
+            <button
+              onClick={() => { setSearchTerm(''); setRoleFilter('all'); setStatusFilter('all'); setSortKey('created_at'); setSortDir('desc'); }}
+              className="px-4 py-2 rounded-lg border border-gray-200 bg-white hover:shadow-sm"
+            >รีเซ็ต</button>
           </div>
         </div>
 
@@ -133,14 +200,12 @@ const Users = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     ผู้ใช้งาน
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ประเภท
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ประเภท</th>
+                  <th onClick={() => toggleSort('created_at')} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
+                    วันที่สมัคร {sortKey === 'created_at' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    วันที่สมัคร
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    เข้าสู่ระบบล่าสุด
+                  <th onClick={() => toggleSort('last_login')} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
+                    เข้าสู่ระบบล่าสุด {sortKey === 'last_login' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     สถานะ
@@ -151,12 +216,17 @@ const Users = () => {
             </tr>
           </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredUsers.map((userItem) => (
+                {sortedUsers.map((userItem) => (
                   <tr key={userItem.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{userItem.full_name}</div>
-                        <div className="text-sm text-gray-500">{userItem.email}</div>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-xs">
+                          {userItem.full_name?.charAt(0) || 'U'}
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{userItem.full_name}</div>
+                          <div className="text-sm text-gray-500">{userItem.email}</div>
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
