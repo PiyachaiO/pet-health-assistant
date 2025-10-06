@@ -7,7 +7,15 @@ CREATE TYPE gender_type AS ENUM ('male', 'female', 'unknown');
 CREATE TYPE appointment_status AS ENUM ('scheduled', 'confirmed', 'completed', 'cancelled');
 CREATE TYPE appointment_type AS ENUM ('checkup', 'vaccination', 'consultation', 'surgery', 'emergency');
 CREATE TYPE record_type AS ENUM ('vaccination', 'medication', 'checkup', 'surgery', 'illness', 'injury');
-CREATE TYPE notification_type AS ENUM ('vaccination_due', 'medication_reminder', 'appointment_reminder', 'checkup_due');
+CREATE TYPE notification_type AS ENUM (
+    'vaccination_due', 
+    'medication_reminder', 
+    'appointment_reminder', 
+    'checkup_due',
+    'article_published',
+    'nutrition_plan_created',
+    'health_record_updated'
+);
 CREATE TYPE priority_level AS ENUM ('low', 'medium', 'high', 'urgent');
 CREATE TYPE approval_status AS ENUM ('pending', 'approved', 'rejected');
 

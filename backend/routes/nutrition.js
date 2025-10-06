@@ -21,6 +21,7 @@ router.get("/recommendations", async (req, res) => {
         pets(user_id, name, species, breed, birth_date, weight),
         veterinarian:users!pet_nutrition_plans_veterinarian_id_fkey(full_name, email)
       `)
+      .order("is_active", { ascending: false })
       .order("created_at", { ascending: false })
 
     // ถ้ามี pet_id ใน query และไม่ใช่ "undefined" หรือ undefined ให้กรองที่ฐานข้อมูลเลย

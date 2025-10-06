@@ -70,7 +70,7 @@ router.get("/", async (req, res) => {
       `)
       // 5. กรองข้อมูลเฉพาะของผู้ใช้งานที่ล็อกอินอยู่
       .eq('user_id', req.user.id)
-      .order("appointment_date", { ascending: true });
+      .order("created_at", { ascending: false });
 
     if (error) {
       return res.status(400).json({
@@ -132,7 +132,7 @@ router.get("/vet", async (req, res) => {
       query = query.eq("pet_id", req.query.pet_id)
     }
 
-    const { data, error } = await query.order("appointment_date", { ascending: true })
+    const { data, error } = await query.order("created_at", { ascending: false })
 
     if (error) {
       return res.status(400).json({
