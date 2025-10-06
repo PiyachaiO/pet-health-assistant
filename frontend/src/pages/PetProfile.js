@@ -233,7 +233,7 @@ const PetProfile = () => {
         )}
 
         {/* Pet Header */}
-        <div className="card mb-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex items-center space-x-6">
             <div className="w-24 h-24 bg-gray-200 rounded-full overflow-hidden">
               {petImage ? (
@@ -245,15 +245,21 @@ const PetProfile = () => {
               )}
             </div>
             <div className="flex-1">
-              <div className="flex items-center space-x-3 mb-2">
-                <h1 className="text-3xl font-bold text-gray-900">{pet.name}</h1>
-                {user?.role === 'veterinarian' && (
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-                    ผู้ป่วย
-                  </span>
-                )}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <h1 className="text-3xl font-bold text-gray-900">{pet.name}</h1>
+                  {user?.role === 'veterinarian' && (
+                    <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">ผู้ป่วย</span>
+                  )}
+                </div>
+                {/* Quick actions */}
+                <div className="hidden md:flex items-center space-x-2">
+                  <button onClick={() => setShowAddRecordModal(true)} className="px-4 py-2 rounded-lg border border-gray-200 bg-white hover:shadow-sm text-sm">เพิ่มบันทึกสุขภาพ</button>
+                  <Link to="/appointments" className="px-4 py-2 rounded-lg border border-gray-200 bg-white hover:shadow-sm text-sm">จองนัดหมาย</Link>
+                  <Link to={`/pets/${id}/nutrition`} className="px-4 py-2 rounded-lg border border-gray-200 bg-white hover:shadow-sm text-sm">โภชนาการ</Link>
+                </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mt-3">
                 <div>
                   <span className="text-gray-600">ชนิด:</span>
                   <p className="font-medium">{pet.species}</p>
