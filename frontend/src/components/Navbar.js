@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import { useSocket } from "../contexts/SocketContext"
-import { Menu, X, Home, Calendar, Bell, FileText, Utensils, LogOut, PawPrint, Settings, User, Users, Shield } from "lucide-react"
+import { Menu, X, Calendar, Bell, FileText, Utensils, LogOut, PawPrint, Settings, User, Users, Shield, LayoutDashboard } from "lucide-react"
 
 const Navbar = () => {
   const { user, logout } = useAuth()
@@ -57,7 +57,6 @@ const Navbar = () => {
 
   // Navigation items for all users (including guests)
   const navigation = [
-    { name: "หน้าแรก", href: "/", icon: Home },
     { name: "บทความ", href: "/articles", icon: FileText },
   ]
 
@@ -66,38 +65,32 @@ const Navbar = () => {
     ? [
         // Dashboard - different for each role
         { 
-          name: user.role === "veterinarian" ? "แดชบอร์ดสัตวแพทย์" 
-               : user.role === "admin" ? "แดชบอร์ดผู้ดูแล" 
-               : "แดชบอร์ด", 
+          name: "แดชบอร์ด", 
           href: user.role === "veterinarian" ? "/vet-dashboard" 
                : user.role === "admin" ? "/admin" 
                : "/dashboard", 
-          icon: user.role === "veterinarian" ? Users 
-               : user.role === "admin" ? Shield 
-               : Home 
+          icon: LayoutDashboard 
         },
         
         // Pets - available for user and vet
         ...(user.role !== "admin" 
-          ? [{ name: "สัตว์เลี้ยงของฉัน", href: "/pets", icon: PawPrint }]
+          ? [{ name: "สัตว์เลี้ยง", href: "/pets", icon: PawPrint }]
           : []
         ),
         
         // Appointments - available for all authenticated users
-        { name: "การนัดหมาย", href: "/appointments", icon: Calendar },
+        { name: "นัดหมาย", href: "/appointments", icon: Calendar },
         
         // Notifications - with badge for unread count
         { 
-          name: user.role === "veterinarian" ? "งานของฉัน" 
-               : user.role === "admin" ? "การจัดการ" 
-               : "การแจ้งเตือน", 
+          name: "แจ้งเตือน", 
           href: "/notifications", 
           icon: Bell,
           badge: unreadCount > 0 ? unreadCount : null
         },
         
         // Nutrition - available for all authenticated users
-        { name: "คำแนะนำโภชนาการ", href: "/nutrition", icon: Utensils },
+        { name: "โภชนาการ", href: "/nutrition", icon: Utensils },
       ]
     : []
 
@@ -116,15 +109,15 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center gap-4">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
-                className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`flex items-center space-x-1 px-3 py-2 rounded-full text-sm font-medium transition-colors ${
                   location.pathname === item.href
-                    ? "text-green-600 bg-green-50"
-                    : "text-gray-700 hover:text-green-600 hover:bg-green-50"
+                    ? "text-green-700 bg-green-100 ring-1 ring-green-200"
+                    : "text-gray-700 hover:text-green-700 hover:bg-green-50"
                 }`}
               >
                 <item.icon className="h-4 w-4" />
@@ -137,10 +130,10 @@ const Navbar = () => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors relative ${
+                  className={`flex items-center space-x-1 px-3 py-2 rounded-full text-sm font-medium transition-colors relative ${
                     location.pathname === item.href
-                      ? "text-green-600 bg-green-50"
-                      : "text-gray-700 hover:text-green-600 hover:bg-green-50"
+                      ? "text-green-700 bg-green-100 ring-1 ring-green-200"
+                      : "text-gray-700 hover:text-green-700 hover:bg-green-50"
                   }`}
                 >
                   <item.icon className="h-4 w-4" />
@@ -234,10 +227,10 @@ const Navbar = () => {
                 key={item.name}
                 to={item.href}
                 onClick={() => setIsMenuOpen(false)}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium ${
+                className={`flex items-center space-x-2 px-3 py-2 rounded-full text-base font-medium ${
                   location.pathname === item.href
-                    ? "text-green-600 bg-green-50"
-                    : "text-gray-700 hover:text-green-600 hover:bg-green-50"
+                    ? "text-green-700 bg-green-100 ring-1 ring-green-200"
+                    : "text-gray-700 hover:text-green-700 hover:bg-green-50"
                 }`}
               >
                 <item.icon className="h-5 w-5" />
@@ -251,10 +244,10 @@ const Navbar = () => {
                   key={item.name}
                   to={item.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium relative ${
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-full text-base font-medium relative ${
                     location.pathname === item.href
-                      ? "text-green-600 bg-green-50"
-                      : "text-gray-700 hover:text-green-600 hover:bg-green-50"
+                      ? "text-green-700 bg-green-100 ring-1 ring-green-200"
+                      : "text-gray-700 hover:text-green-700 hover:bg-green-50"
                   }`}
                 >
                   <item.icon className="h-5 w-5" />
