@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../services/api';
-import { Users as UsersIcon, Search, Filter, TrendingUp } from 'lucide-react';
+import { Users as UsersIcon, Search, Filter, TrendingUp, UserX, UserCheck } from 'lucide-react';
 
 const Users = () => {
   const { user } = useAuth();
