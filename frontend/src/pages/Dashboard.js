@@ -131,90 +131,134 @@ const Dashboard = () => {
     );
   }
 
+  
+  // Derived UI state
+  const unreadCount = notifications.filter((n) => !n.is_read).length
+  const urgentCount = notifications.filter((n) => !n.is_read && (n.priority === "high" || n.priority === "urgent")).length
+  const nextAppointment = appointments.length > 0 ? appointments[0] : null
 
-  // แดชบอร์ดสำหรับผู้ใช้ทั่วไป (โค้ดเดิม)
+  // แดชบอร์ดสำหรับผู้ใช้ทั่วไป
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {/* Header - Enhanced */}
         <div className="mb-8">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-              {user?.profile_picture_url ? (
-                <img 
-                  src={user.profile_picture_url} 
-                  alt={user.full_name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.style.display = 'none'
-                    e.target.nextSibling.style.display = 'flex'
-                  }}
-                />
-              ) : null}
-              <div className={`w-full h-full flex items-center justify-center ${user?.profile_picture_url ? 'hidden' : 'flex'}`}>
-                <PawPrint className="h-6 w-6 text-gray-400" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl flex items-center justify-center overflow-hidden shadow-lg">
+                {user?.profile_picture_url ? (
+                  <img 
+                    src={user.profile_picture_url} 
+                    alt={user.full_name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none'
+                      e.target.nextSibling.style.display = 'flex'
+                    }}
+                  />
+                ) : null}
+                <div className={`w-full h-full flex items-center justify-center ${user?.profile_picture_url ? 'hidden' : 'flex'}`}>
+                  <PawPrint className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">สวัสดี, <span className="text-green-600">{user?.full_name}</span></h1>
+                <p className="text-gray-600 mt-1">ดูสถานะการดูแลสัตว์เลี้ยงทั้งหมดของคุณได้ที่นี่</p>
+                <div className="flex items-center space-x-3 mt-2 text-sm">
+                  <span className="text-gray-600">สัตว์เลี้ยง {pets.length} ตัว</span>
+                  <span className="text-gray-300">•</span>
+                  <span className="text-gray-600">แจ้งเตือนที่ยังไม่อ่าน {unreadCount} รายการ</span>
+                </div>
               </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                สวัสดี, <span className="text-green-600 font-bold">{user?.full_name}</span>
-              </h1>
-              <p className="text-gray-600 mt-2">ยินดีต้อนรับสู่แดชบอร์ดการดูแลสัตว์เลี้ยงของคุณ</p>
+            {/* Quick Actions */}
+            <div className="hidden md:flex items-center space-x-3">
+              <button onClick={() => setShowAddPetModal(true)} className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <Plus className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium">เพิ่มสัตว์เลี้ยง</span>
+              </button>
+              <Link to="/appointments" className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <Calendar className="h-4 w-4 text-blue-500" />
+                <span className="text-sm font-medium">นัดหมาย</span>
+              </Link>
+              <Link to="/notifications" className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <Bell className="h-4 w-4 text-purple-500" />
+                <span className="text-sm font-medium">แจ้งเตือน</span>
+              </Link>
             </div>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="card">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <PawPrint className="h-6 w-6 text-green-500" />
+        {/* Priority Actions */}
+        <div className="mb-8">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">การดำเนินการสำคัญ</h3>
+                <p className="text-gray-600 mt-1">สิ่งที่ควรทำต่อไป</p>
               </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">สัตว์เลี้ยงของฉัน</p>
-                <p className="text-2xl font-bold text-gray-900">{pets.length} ตัว</p>
-              </div>
+              <Link to="/notifications" className="text-green-600 hover:text-green-700 text-sm font-medium">ดูการแจ้งเตือน</Link>
             </div>
-          </div>
 
-          <div className="card">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <Calendar className="h-6 w-6 text-blue-500" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">นัดหมายถัดไป</p>
-                {appointments.length > 0 ? (
-                  <div>
-                    <p className="text-xl font-bold text-gray-900">
-                      {new Date(appointments[0].appointment_date).toLocaleString("th-TH", {
-                        dateStyle: 'short',
-                        timeStyle: 'short'
-                      })}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {appointments[0].pets?.name || 'N/A'} - {appointments[0].appointment_type}
-                    </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Urgent notifications */}
+              <div className={`relative p-4 rounded-xl border-2 transition-all ${urgentCount > 0 ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-200'}`}>
+                {urgentCount > 0 && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">{urgentCount}</div>
+                )}
+                <div className="flex items-center space-x-3">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${urgentCount > 0 ? 'bg-red-100' : 'bg-gray-100'}`}>
+                    <Bell className={`h-6 w-6 ${urgentCount > 0 ? 'text-red-600' : 'text-gray-400'}`} />
                   </div>
-                ) : (
-                  <p className="text-2xl font-bold text-gray-900">-</p>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">การแจ้งเตือนสำคัญ</p>
+                    <p className={`text-2xl font-bold ${urgentCount > 0 ? 'text-red-600' : 'text-gray-400'}`}>{urgentCount} รายการ</p>
+                  </div>
+                </div>
+                {urgentCount > 0 && (
+                  <div className="mt-3">
+                    <Link to="/notifications" className="block w-full text-center bg-red-500 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-red-600 transition-colors">เปิดดู</Link>
+                  </div>
                 )}
               </div>
+
+              {/* Next appointment */}
+              <div className={`p-4 rounded-xl border-2 bg-blue-50 border-blue-200`}>
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                    <Calendar className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">นัดหมายถัดไป</p>
+                    {nextAppointment ? (
+                      <>
+                        <p className="text-lg font-semibold text-blue-700">
+                          {new Date(nextAppointment.appointment_date).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' })}
+                        </p>
+                        <p className="text-xs text-gray-600 mt-1">{nextAppointment.pets?.name || 'N/A'} • {nextAppointment.appointment_type}</p>
+                      </>
+                    ) : (
+                      <p className="text-gray-500">-
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Pets count */}
+              <div className="p-4 rounded-xl border-2 bg-green-50 border-green-200">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
+                    <PawPrint className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">สัตว์เลี้ยงของฉัน</p>
+                    <p className="text-2xl font-bold text-green-600">{pets.length} ตัว</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-
-          <Link to="/appointments" className="card hover:shadow-lg transition-shadow cursor-pointer">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                <Calendar className="h-6 w-6 text-purple-500" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">นัดหมาย</p>
-                <p className="text-lg font-bold text-gray-900">จัดการนัดหมาย</p>
-              </div>
-            </div>
-          </Link>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -271,42 +315,34 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* Notifications Section */}
+          {/* Notifications Section - Enhanced */}
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900">การแจ้งเตือน</h2>
-              <Link to="/notifications" className="text-green-500 hover:text-green-600">
-                ดูทั้งหมด
-              </Link>
+              <Link to="/notifications" className="text-green-600 hover:text-green-700">ดูทั้งหมด</Link>
             </div>
 
             <div className="space-y-4">
               {notifications.length === 0 ? (
-                <div className="card text-center py-8">
-                  <Bell className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 text-center py-10">
+                  <Bell className="h-14 w-14 text-gray-300 mx-auto mb-3" />
                   <p className="text-gray-600">ไม่มีการแจ้งเตือน</p>
                   <p className="text-sm text-gray-500">ทุกอย่างเป็นไปตามกำหนด</p>
                 </div>
               ) : (
                 notifications.slice(0, 3).map((notification) => (
-                  <div key={notification.id} className="card">
-                    <div className="flex items-start space-x-3">
-                      <div
-                        className={`w-3 h-3 rounded-full mt-2 ${notification.priority === "high"
-                            ? "bg-red-500"
-                            : notification.priority === "medium"
-                              ? "bg-yellow-500"
-                              : "bg-green-500"
-                          }`}
-                      />
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-900">{notification.title}</h4>
-                        <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
-                        {notification.due_date && (
-                          <p className="text-xs text-gray-500 mt-2">
-                            กำหนด: {new Date(notification.due_date).toLocaleDateString("th-TH")}
-                          </p>
-                        )}
+                  <div key={notification.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start space-x-3">
+                        <div className={`w-2.5 h-2.5 rounded-full mt-2 ${notification.priority === 'high' || notification.priority === 'urgent' ? 'bg-red-500' : notification.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'}`} />
+                        <div>
+                          <h4 className="font-medium text-gray-900">{notification.title}</h4>
+                          <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                          <p className="text-xs text-gray-500 mt-2">{new Date(notification.created_at || notification.due_date).toLocaleString('th-TH', { dateStyle: 'medium' })}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Link to="/notifications" className="text-sm text-green-600 hover:text-green-700">เปิด</Link>
                       </div>
                     </div>
                   </div>
