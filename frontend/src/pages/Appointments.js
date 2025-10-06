@@ -225,7 +225,7 @@ const Appointments = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {/* Header - Enhanced */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">การนัดหมาย</h1>
@@ -239,10 +239,10 @@ const Appointments = () => {
             </p>
           </div>
           {user?.role !== "admin" && (
-          <button onClick={() => setShowBookModal(true)} className="btn-primary flex items-center space-x-2">
-            <Plus className="h-4 w-4" />
-            <span>จองนัดหมาย</span>
-          </button>
+            <button onClick={() => setShowBookModal(true)} className="flex items-center space-x-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
+              <Plus className="h-4 w-4" />
+              <span>จองนัดหมาย</span>
+            </button>
           )}
         </div>
 
@@ -268,20 +268,20 @@ const Appointments = () => {
         ) : (
           <div className="space-y-4">
             {appointments.map((appointment) => (
-              <div key={appointment.id} className={`border rounded-lg p-4 ${
-                appointment.status === "scheduled" ? "bg-orange-50" : 
-                appointment.status === "confirmed" ? "bg-green-50" :
-                appointment.status === "completed" ? "bg-gray-50" :
-                appointment.status === "cancelled" ? "bg-red-50" : "bg-gray-50"
+              <div key={appointment.id} className={`rounded-2xl border p-5 shadow-sm ${
+                appointment.status === "scheduled" ? "bg-orange-50 border-orange-100" : 
+                appointment.status === "confirmed" ? "bg-green-50 border-green-100" :
+                appointment.status === "completed" ? "bg-gray-50 border-gray-100" :
+                appointment.status === "cancelled" ? "bg-red-50 border-red-100" : "bg-gray-50 border-gray-100"
               }`}>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-2">
-                      <Calendar className="h-4 w-4 text-blue-500" />
+                      <Calendar className="h-5 w-5 text-blue-600" />
                       <span className="font-medium text-gray-900">
                         {getAppointmentTypeText(appointment.appointment_type)}
                       </span>
-                      <span className={`px-2 py-1 text-xs rounded-full ${
+                      <span className={`px-2.5 py-0.5 text-xs rounded-full font-medium ${
                         appointment.status === "scheduled" ? "bg-orange-100 text-orange-800" :
                         appointment.status === "confirmed" ? "bg-green-100 text-green-800" :
                         appointment.status === "completed" ? "bg-gray-100 text-gray-800" :
@@ -347,14 +347,14 @@ const Appointments = () => {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleApprovalAction(appointment, "approve")}
-                          className="flex items-center space-x-1 bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:bg-green-600"
+                          className="flex items-center space-x-1 bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600"
                         >
                           <CheckCircle className="h-4 w-4" />
                           <span>อนุมัติ</span>
                         </button>
                         <button
                           onClick={() => handleApprovalAction(appointment, "reject")}
-                          className="flex items-center space-x-1 bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600"
+                          className="flex items-center space-x-1 bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-600"
                         >
                           <XCircle className="h-4 w-4" />
                           <span>ปฏิเสธ</span>
