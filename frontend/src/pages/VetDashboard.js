@@ -900,5 +900,3 @@ const VetDashboard = () => {
 }
 
 export default VetDashboard
-
-export default VetDashboard
