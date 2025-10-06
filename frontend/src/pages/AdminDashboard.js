@@ -200,30 +200,48 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header - Enhanced */}
         <div className="mb-8">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-              {user.profile_picture_url ? (
-                <img 
-                  src={user.profile_picture_url} 
-                  alt={user.full_name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.style.display = 'none'
-                    e.target.nextSibling.style.display = 'flex'
-                  }}
-                />
-              ) : null}
-              <div className={`w-full h-full flex items-center justify-center ${user.profile_picture_url ? 'hidden' : 'flex'}`}>
-                <Users className="h-6 w-6 text-gray-400" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl flex items-center justify-center overflow-hidden shadow-lg">
+                {user.profile_picture_url ? (
+                  <img 
+                    src={user.profile_picture_url} 
+                    alt={user.full_name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none'
+                      e.target.nextSibling.style.display = 'flex'
+                    }}
+                  />
+                ) : null}
+                <div className={`w-full h-full flex items-center justify-center ${user.profile_picture_url ? 'hidden' : 'flex'}`}>
+                  <Users className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">แดชบอร์ดผู้ดูแลระบบ</h1>
+                <p className="text-gray-600 mt-1">สวัสดี, {user.full_name}</p>
+                <div className="flex items-center space-x-3 mt-2 text-sm">
+                  <span className="text-gray-600">ผู้ใช้ทั้งหมด {stats?.total_users || 0}</span>
+                  <span className="text-gray-300">•</span>
+                  <span className="text-gray-600">รออนุมัติ {stats?.pending_appointments || 0}</span>
+                </div>
               </div>
             </div>
-            <div>
-          <h1 className="text-3xl font-bold text-gray-900">แดชบอร์ดผู้ดูแลระบบ</h1>
-          <p className="text-gray-600 mt-2">สวัสดี, {user.full_name}</p>
+            {/* Quick Actions */}
+            <div className="hidden md:flex items-center space-x-3">
+              <a href="/admin/users" className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <Users className="h-4 w-4 text-blue-500" />
+                <span className="text-sm font-medium">จัดการผู้ใช้</span>
+              </a>
+              <a href="/admin/articles" className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <FileText className="h-4 w-4 text-purple-500" />
+                <span className="text-sm font-medium">จัดการบทความ</span>
+              </a>
             </div>
           </div>
         </div>
@@ -330,25 +348,30 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Tabs */}
+        {/* Enhanced Tabs */}
         <div className="mb-8">
-          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
+          <div className="flex flex-wrap gap-2">
             {[
-              { key: "overview", label: "ภาพรวม" },
-              {
-                key: "approvals",
-                label: `การอนุมัติ (${stats?.pending_appointments || 0})`,
-              },
-              { key: "users", label: "จัดการผู้ใช้" },
+              { key: "overview", label: "ภาพรวม", icon: Users, count: null },
+              { key: "approvals", label: "การอนุมัติ", icon: CheckCircle, count: stats?.pending_appointments || 0 },
+              { key: "users", label: "ผู้ใช้", icon: UserCheck, count: users.length },
             ].map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
-                  activeTab === tab.key ? "bg-white text-green-600 shadow-sm" : "text-gray-600 hover:text-gray-900"
+                className={`flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                  activeTab === tab.key 
+                    ? "bg-green-500 text-white shadow-lg transform scale-105" 
+                    : "bg-white text-gray-600 hover:text-gray-900 hover:shadow-md border border-gray-200"
                 }`}
               >
-                {tab.label}
+                <tab.icon className="h-4 w-4" />
+                <span>{tab.label}</span>
+                {tab.count !== null && (
+                  <span className={`px-2 py-0.5 text-xs rounded-full ${
+                    activeTab === tab.key ? "bg-white bg-opacity-20 text-white" : "bg-gray-100 text-gray-600"
+                  }`}>{tab.count}</span>
+                )}
               </button>
             ))}
           </div>
@@ -424,7 +447,7 @@ const AdminDashboard = () => {
         {activeTab === "approvals" && (
           <div className="space-y-8">
             {/* Pending Appointments */}
-            <div className="card">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900">
                   การนัดหมายรอการอนุมัติ ({pendingApprovals.appointments?.length || 0})
@@ -437,7 +460,7 @@ const AdminDashboard = () => {
               ) : (
                 <div className="space-y-4">
                   {pendingApprovals.appointments.map((appointment) => (
-                    <div key={appointment.id} className="border rounded-lg p-4 bg-orange-50">
+                    <div key={appointment.id} className="border rounded-xl p-4 bg-orange-50">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-2">
@@ -492,14 +515,14 @@ const AdminDashboard = () => {
                         <div className="flex space-x-2 ml-4">
                           <button
                             onClick={() => handleApprovalAction(appointment, "appointment", "approve")}
-                            className="flex items-center space-x-1 bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:bg-green-600"
+                            className="flex items-center space-x-1 bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
                           >
                             <CheckCircle className="h-4 w-4" />
                             <span>อนุมัติ</span>
                           </button>
                           <button
                             onClick={() => handleApprovalAction(appointment, "appointment", "reject")}
-                            className="flex items-center space-x-1 bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600"
+                            className="flex items-center space-x-1 bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-600 transition-colors"
                           >
                             <XCircle className="h-4 w-4" />
                             <span>ปฏิเสธ</span>
