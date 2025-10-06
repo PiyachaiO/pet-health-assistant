@@ -101,7 +101,7 @@ router.post("/vet-recommendation", [
 
         if (error) throw error;
 
-        console.log(`[Nutrition Plan] Created new active plan: ${newPlan.id}`);
+        console.log(`[Nutrition Plan] ✅ Created new active plan: ${newPlan.id}`);
 
         // 3. Send notification to pet owner
         try {

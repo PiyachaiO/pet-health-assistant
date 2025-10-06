@@ -224,14 +224,18 @@ async function notifyVetResponded(userId, responseData) {
 
 /**
  * แจ้งเตือนผู้ใช้เมื่อมีแผนโภชนาการใหม่
+ * @param {string} userId - User ID to notify
+ * @param {object} nutritionData - Nutrition plan data including pet_name, vet_name, etc.
  */
-async function notifyNutritionPlanCreated(userId, petId, planData) {
+async function notifyNutritionPlanCreated(userId, nutritionData) {
+  console.log('[notifyNutritionPlanCreated] ✅ FIXED VERSION - Called with:', { userId, nutritionData });
+  
   const notification = {
     user_id: userId,
-    pet_id: petId,
-    notification_type: 'nutrition_plan',
+    pet_id: nutritionData.pet_id || null,
+    notification_type: 'checkup_due', // Temporary: using existing enum value
     title: 'แผนโภชนาการใหม่',
-    message: `มีแผนโภชนาการใหม่สำหรับสัตว์เลี้ยงของคุณ: ${planData.pet_name}`,
+    message: `สัตวแพทย์ ${nutritionData.vet_name} ได้สร้างแผนโภชนาการใหม่สำหรับ ${nutritionData.pet_name}`,
     priority: 'medium',
     is_read: false,
     is_completed: false
@@ -243,10 +247,17 @@ async function notifyNutritionPlanCreated(userId, petId, planData) {
     .select()
     .single();
 
-  if (!error && data) {
+  if (error) {
+    console.error('[notifyNutritionPlanCreated] Database error:', error);
+    return { data, error };
+  }
+
+  if (data) {
+    console.log('[notifyNutritionPlanCreated] ✅ Notification saved to DB:', data.id);
+    console.log('[notifyNutritionPlanCreated] ✅ Emitting to user:', userId);
     emitToUser(userId, 'notification:nutrition_plan', {
       ...data,
-      plan: planData
+      nutrition_plan: nutritionData
     });
   }
 
