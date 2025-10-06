@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import { useSocket } from "../contexts/SocketContext"
 import apiClient from "../services/api"
@@ -8,6 +9,7 @@ import { Bell, Check, Clock, AlertCircle, Calendar, User, FileText, Wifi, WifiOf
 
 const Notifications = () => {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const { notifications: socketNotifications, unreadCount, markAsRead: socketMarkAsRead, markAllAsRead, isConnected } = useSocket()
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
@@ -167,6 +169,32 @@ const Notifications = () => {
     }
   }
 
+  // Primary action per notification type
+  const handlePrimaryAction = (n) => {
+    try {
+      switch (n.notification_type) {
+        case "article_published":
+          return navigate(n.article_id ? `/articles/${n.article_id}` : "/articles")
+        case "nutrition_plan_created":
+          return navigate(n.pet_id ? `/pets/${n.pet_id}/nutrition${n.plan_id ? `?plan_id=${n.plan_id}` : ''}` : "/nutrition")
+        case "health_record_updated":
+        case "vaccination_due":
+        case "medication_reminder":
+        case "checkup_due":
+          return navigate(n.pet_id ? `/pets/${n.pet_id}#health` : "/pets")
+        case "appointment_reminder":
+          return navigate("/appointments")
+        default:
+          return null
+      }
+    } finally {
+      // mark as read after navigation
+      if (!n.is_read) {
+        markAsRead(n.id)
+      }
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -296,7 +324,14 @@ const Notifications = () => {
                         <p className="text-gray-600 mt-1">{notification.message}</p>
                       </div>
 
-                      <div className="flex items-center space-x-2 ml-4">
+                    <div className="flex items-center space-x-2 ml-4">
+                      {/* Primary action */}
+                      <button
+                        onClick={() => handlePrimaryAction(notification)}
+                        className="text-sm text-green-600 hover:text-green-700 font-medium hover:underline"
+                      >
+                        เปิด
+                      </button>
                         {!notification.is_read && (
                           <button
                             onClick={() => markAsRead(notification.id)}

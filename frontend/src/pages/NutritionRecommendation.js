@@ -19,6 +19,7 @@ const NutritionRecommendation = () => {
   const [allPlans, setAllPlans] = useState([]) // plans for current pet
   const [overviewPlans, setOverviewPlans] = useState([]) // plans for all pets (overview mode)
   const [showVetForm, setShowVetForm] = useState(false)
+  const [activeTab, setActiveTab] = useState('current') // current | history | create
   const { loading, execute } = useApi()
 
   useEffect(() => {
@@ -67,12 +68,21 @@ const NutritionRecommendation = () => {
       // อ่าน plan_id จาก query หากมี ให้ set เป็นรายการที่เลือก
       const query = new URLSearchParams(location.search)
       const planId = query.get('plan_id')
+      const selectFirstByTab = () => {
+        if (activeTab === 'history') {
+          const firstPrev = plans.find(p => !p.is_active)
+          if (firstPrev) return firstPrev
+        }
+        const firstActive = plans.find(p => p.is_active)
+        return firstActive || plans[0]
+      }
+
       if (planId) {
         const found = plans.find(p => p.id === planId)
         if (found) setVetRecommendation(found)
-        else if (plans.length > 0) setVetRecommendation(plans[0])
+        else if (plans.length > 0) setVetRecommendation(selectFirstByTab())
       } else if (plans.length > 0) {
-        setVetRecommendation(plans[0])
+        setVetRecommendation(selectFirstByTab())
       }
     } catch (error) {
       console.error("Failed to fetch vet recommendation:", error)
@@ -111,7 +121,7 @@ const NutritionRecommendation = () => {
         )}
 
         {/* Header */}
-        <div className="card mb-8">
+        <div className="card mb-4">
           <div className="flex items-center space-x-4">
             <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
               <Utensils className="h-8 w-8 text-orange-500" />
@@ -124,6 +134,33 @@ const NutritionRecommendation = () => {
                 <p className="text-gray-600">รวมทุกตัวของฉัน</p>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="mb-8">
+          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
+            {[
+              { key: 'current', label: 'แผนปัจจุบัน' },
+              { key: 'history', label: 'ประวัติ' },
+              ...(user?.role === 'veterinarian' ? [{ key: 'create', label: 'สร้างแผนใหม่' }] : []),
+            ].map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => {
+                  setActiveTab(tab.key)
+                  if (tab.key === 'create') setShowVetForm(true); else setShowVetForm(false)
+                  // เลือกแผนตามแท็บ
+                  if (tab.key !== 'create' && allPlans.length > 0) {
+                    const target = tab.key === 'history' ? allPlans.find(p => !p.is_active) : allPlans.find(p => p.is_active) || allPlans[0]
+                    if (target) setVetRecommendation(target)
+                  }
+                }}
+                className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === tab.key ? 'bg-white text-green-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -164,11 +201,12 @@ const NutritionRecommendation = () => {
         )}
 
         {/* โหมดรายตัว: มี petId */}
-        {petId && (
+        {petId && activeTab !== 'create' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Sidebar: รายการแผน */}
           <div className="lg:col-span-1 space-y-4">
-            {/* แผนปัจจุบัน (Active Plan) */}
+            {/* แผนปัจจุบัน */}
+            {activeTab === 'current' && (
             <div className="card">
               <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
                 <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
@@ -218,9 +256,10 @@ const NutritionRecommendation = () => {
                 </div>
               )}
             </div>
+            )}
 
-            {/* แผนก่อนหน้า (Inactive Plans) */}
-            {allPlans.filter(p => !p.is_active).length > 0 && (
+            {/* แผนก่อนหน้า */}
+            {activeTab === 'history' && allPlans.filter(p => !p.is_active).length > 0 && (
               <div className="card">
                 <h3 className="text-md font-semibold text-gray-700 mb-3 flex items-center">
                   <span className="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
@@ -340,7 +379,7 @@ const NutritionRecommendation = () => {
         {/* Add Vet Recommendation Button */}
         {user?.role === 'veterinarian' && !showVetForm && (
              <div className="text-center mt-8">
-                <button onClick={() => setShowVetForm(true)} className="btn-outline">
+               <button onClick={() => { setActiveTab('create'); setShowVetForm(true) }} className="btn-outline">
                     <Edit size={18} className="mr-2" />
                     {petId ? 'เพิ่มคำแนะนำจากสัตวแพทย์' : 'สร้างแผนโภชนาการใหม่'}
                 </button>
