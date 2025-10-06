@@ -19,6 +19,12 @@ const PetProfile = () => {
   const [vetRecommendation, setVetRecommendation] = useState(null)
   const [showAddRecordModal, setShowAddRecordModal] = useState(false)
   const [activeTab, setActiveTab] = useState("general")
+  // Health tab UI state
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filterType, setFilterType] = useState("all")
+  const [filterYear, setFilterYear] = useState("all")
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 8
   const [petImage, setPetImage] = useState(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -157,6 +163,36 @@ const PetProfile = () => {
       return months > 0 ? `${years} ปี ${months} เดือน` : `${years} ปี`
     }
   }
+
+  // ===== Derived data for Health tab =====
+  const healthYears = Array.from(new Set(
+    (healthRecords || []).map(r => new Date(r.record_date).getFullYear().toString())
+  )).sort((a, b) => b.localeCompare(a))
+
+  const filteredRecords = (healthRecords || [])
+    .filter(r => filterType === "all" || r.record_type === filterType)
+    .filter(r => filterYear === "all" || new Date(r.record_date).getFullYear().toString() === filterYear)
+    .filter(r => {
+      if (!searchTerm) return true
+      const q = searchTerm.toLowerCase()
+      return (
+        (r.title || "").toLowerCase().includes(q) ||
+        (r.description || "").toLowerCase().includes(q)
+      )
+    })
+    .sort((a, b) => new Date(b.record_date) - new Date(a.record_date))
+
+  const totalPages = Math.max(1, Math.ceil(filteredRecords.length / itemsPerPage))
+  const paginatedRecords = filteredRecords.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+
+  // Summary values
+  const lastCheckup = (healthRecords || [])
+    .filter(r => r.record_type === 'checkup')
+    .sort((a, b) => new Date(b.record_date) - new Date(a.record_date))[0]
+  const vaccinationNextDue = (healthRecords || [])
+    .filter(r => r.record_type === 'vaccination' && r.next_due_date)
+    .sort((a, b) => new Date(a.next_due_date) - new Date(b.next_due_date))[0]
+  const medicationsCount = (healthRecords || []).filter(r => r.record_type === 'medication').length
 
   if (loading) {
     return (
@@ -402,6 +438,74 @@ const PetProfile = () => {
 
         {activeTab === "health" && (
           <div className="space-y-6">
+            {/* Summary */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">ตรวจสุขภาพล่าสุด</p>
+                    <p className="text-lg font-semibold text-gray-900 mt-1">{lastCheckup ? new Date(lastCheckup.record_date).toLocaleDateString('th-TH') : '-'}</p>
+                  </div>
+                  <Stethoscope className="h-6 w-6 text-purple-600" />
+                </div>
+              </div>
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">วัคซีนครั้งถัดไป</p>
+                    <p className="text-lg font-semibold text-gray-900 mt-1">{vaccinationNextDue ? new Date(vaccinationNextDue.next_due_date).toLocaleDateString('th-TH') : '-'}</p>
+                  </div>
+                  <Syringe className="h-6 w-6 text-blue-600" />
+                </div>
+              </div>
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">รายการยาในประวัติ</p>
+                    <p className="text-lg font-semibold text-gray-900 mt-1">{medicationsCount}</p>
+                  </div>
+                  <Pill className="h-6 w-6 text-green-600" />
+                </div>
+              </div>
+            </div>
+
+            {/* Filters & Search */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+              <div className="grid md:grid-cols-3 gap-3">
+                <input
+                  type="text"
+                  placeholder="ค้นหาบันทึก..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  value={searchTerm}
+                  onChange={(e) => { setCurrentPage(1); setSearchTerm(e.target.value) }}
+                />
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  value={filterType}
+                  onChange={(e) => { setCurrentPage(1); setFilterType(e.target.value) }}
+                >
+                  <option value="all">ทุกประเภท</option>
+                  <option value="vaccination">วัคซีน</option>
+                  <option value="checkup">ตรวจสุขภาพ</option>
+                  <option value="medication">ยา</option>
+                  <option value="surgery">ผ่าตัด</option>
+                  <option value="illness">เจ็บป่วย</option>
+                  <option value="injury">อุบัติเหตุ</option>
+                </select>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  value={filterYear}
+                  onChange={(e) => { setCurrentPage(1); setFilterYear(e.target.value) }}
+                >
+                  <option value="all">ทุกปี</option>
+                  {healthYears.map(y => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* List */}
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900">ประวัติสุขภาพ</h2>
               <button onClick={() => setShowAddRecordModal(true)} className="btn-primary flex items-center space-x-2">
@@ -410,31 +514,23 @@ const PetProfile = () => {
               </button>
             </div>
 
-            {healthRecords.length === 0 ? (
+            {filteredRecords.length === 0 ? (
               <div className="card text-center py-12">
                 <Stethoscope className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">ยังไม่มีประวัติสุขภาพ</h3>
-                <p className="text-gray-600 mb-4">
-                  {user?.role === 'veterinarian' 
-                    ? `สัตว์เลี้ยง ${pet.name} ยังไม่มีประวัติการรักษา` 
-                    : `เพิ่มบันทึกสุขภาพแรกของ ${pet.name}`
-                  }
-                </p>
-                <button onClick={() => setShowAddRecordModal(true)} className="btn-primary">
-                  เพิ่มบันทึกใหม่
-                </button>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">ไม่พบบันทึกสุขภาพ</h3>
+                <p className="text-gray-600">ลองเปลี่ยนตัวกรองหรือเพิ่มบันทึกใหม่</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {healthRecords.map((record) => (
-                  <div key={record.id} className="card">
+                {paginatedRecords.map((record) => (
+                  <div key={record.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
                     <div className="flex items-start space-x-4">
                       <div className="flex-shrink-0 mt-1">{getRecordIcon(record.record_type)}</div>
                       <div className="flex-1">
                         <div className="flex items-start justify-between">
                           <div>
                             <h4 className="text-lg font-medium text-gray-900">{record.title}</h4>
-                            <p className="text-gray-600 mt-1">{record.description}</p>
+                            {record.description && <p className="text-gray-600 mt-1">{record.description}</p>}
                             <div className="flex items-center space-x-4 mt-3 text-sm text-gray-500">
                               <span>วันที่: {new Date(record.record_date).toLocaleDateString("th-TH")}</span>
                               {record.next_due_date && (
@@ -443,7 +539,7 @@ const PetProfile = () => {
                             </div>
                           </div>
                           <span
-                            className={`px-2 py-1 rounded-full text-xs ${
+                            className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
                               record.record_type === "vaccination"
                                 ? "bg-blue-100 text-blue-800"
                                 : record.record_type === "medication"
@@ -466,6 +562,23 @@ const PetProfile = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center space-x-2">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  className="px-3 py-1 rounded-md border border-gray-300 text-sm disabled:opacity-50"
+                >ก่อนหน้า</button>
+                <span className="text-sm text-gray-600">หน้า {currentPage} / {totalPages}</span>
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  className="px-3 py-1 rounded-md border border-gray-300 text-sm disabled:opacity-50"
+                >ถัดไป</button>
               </div>
             )}
           </div>
