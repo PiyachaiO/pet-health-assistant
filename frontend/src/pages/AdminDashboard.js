@@ -45,11 +45,12 @@ const AdminDashboard = () => {
     const imagePromises = users.map(async (user) => {
       if (user.profile_picture_url && !user.profile_picture_url.startsWith('data:')) {
         try {
+          // Cloudinary URL or absolute URL → use directly
+          if (user.profile_picture_url.startsWith('http')) {
+            return { userId: user.id, image: user.profile_picture_url }
+          }
           const filename = user.profile_picture_url.includes('/') ? user.profile_picture_url.split('/').pop() : user.profile_picture_url
-          const response = await fetch(`${process.env.REACT_APP_API_URL}/upload/image/${filename}`, {
-            mode: 'cors',
-            credentials: 'omit'
-          })
+          const response = await fetch(`${process.env.REACT_APP_API_URL}/upload/image/${filename}`, { mode: 'cors', credentials: 'omit' })
           if (response.ok) {
             const blob = await response.blob()
             const reader = new FileReader()

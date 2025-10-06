@@ -30,14 +30,14 @@ const Profile = () => {
       // Load existing profile image
       if (user.profile_picture_url) {
         try {
-          // For existing images, try to fetch and convert to base64
-          if (user.profile_picture_url.startsWith('/uploads/') || user.profile_picture_url.startsWith('http://localhost:5000/api/upload/image/')) {
-            const filename = user.profile_picture_url.includes('/') ? user.profile_picture_url.split('/').pop() : user.profile_picture_url
+          const url = user.profile_picture_url
+          if (url.startsWith('data:') || url.startsWith('http')) {
+            setProfileImage(url)
+          } else {
+            const filename = url.includes('/') ? url.split('/').pop() : url
             fetch(`${process.env.REACT_APP_API_URL}/upload/image/${filename}`)
               .then(response => {
-                if (response.ok) {
-                  return response.blob()
-                }
+                if (response.ok) return response.blob()
                 throw new Error('Failed to load image')
               })
               .then(blob => {
@@ -49,8 +49,6 @@ const Profile = () => {
                 console.error('Failed to load existing profile image:', error)
                 setProfileImage(null)
               })
-          } else {
-            setProfileImage(user.profile_picture_url)
           }
         } catch (error) {
           console.error('Failed to load existing profile image:', error)

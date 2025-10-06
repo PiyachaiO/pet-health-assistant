@@ -17,33 +17,39 @@ const Navbar = () => {
   // Load profile image when user changes
   useEffect(() => {
     if (user?.profile_picture_url) {
-      // If it's already a base64 image, use it directly
-      if (user.profile_picture_url.startsWith('data:')) {
-        setProfileImage(user.profile_picture_url)
-      } else {
-        // Try to load and convert to base64
-        const loadImage = async () => {
-          try {
-            const filename = user.profile_picture_url.includes('/') ? user.profile_picture_url.split('/').pop() : user.profile_picture_url
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/upload/image/${filename}`, {
-              mode: 'cors',
-              credentials: 'omit'
-            })
-            if (response.ok) {
-              const blob = await response.blob()
-              const reader = new FileReader()
-              reader.onload = (e) => setProfileImage(e.target.result)
-              reader.readAsDataURL(blob)
-            } else {
-              setProfileImage(null)
-            }
-          } catch (error) {
-            console.error('Failed to load profile image:', error)
+      const url = user.profile_picture_url
+      // Base64 provided directly
+      if (url.startsWith('data:')) {
+        setProfileImage(url)
+        return
+      }
+      // If it's a full remote URL (e.g. Cloudinary), just use it
+      if (url.startsWith('http')) {
+        setProfileImage(url)
+        return
+      }
+      // Otherwise, assume it's a local upload file name/path → fetch from backend
+      const filename = url.includes('/') ? url.split('/').pop() : url
+      const loadImage = async () => {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_API_URL}/upload/image/${filename}`, {
+            mode: 'cors',
+            credentials: 'omit'
+          })
+          if (response.ok) {
+            const blob = await response.blob()
+            const reader = new FileReader()
+            reader.onload = (e) => setProfileImage(e.target.result)
+            reader.readAsDataURL(blob)
+          } else {
             setProfileImage(null)
           }
+        } catch (error) {
+          console.error('Failed to load profile image:', error)
+          setProfileImage(null)
         }
-        loadImage()
       }
+      loadImage()
     } else {
       setProfileImage(null)
     }

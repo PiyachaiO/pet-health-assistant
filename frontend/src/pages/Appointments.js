@@ -34,11 +34,12 @@ const Appointments = () => {
     const imagePromises = appointments.map(async (appointment) => {
       if (appointment.user?.profile_picture_url && !appointment.user.profile_picture_url.startsWith('data:')) {
         try {
+          // Cloudinary URL or absolute URL → use directly
+          if (appointment.user.profile_picture_url.startsWith('http')) {
+            return { userId: appointment.user.id, image: appointment.user.profile_picture_url }
+          }
           const filename = appointment.user.profile_picture_url.includes('/') ? appointment.user.profile_picture_url.split('/').pop() : appointment.user.profile_picture_url
-          const response = await fetch(`${process.env.REACT_APP_API_URL}/upload/image/${filename}`, {
-            mode: 'cors',
-            credentials: 'omit'
-          })
+          const response = await fetch(`${process.env.REACT_APP_API_URL}/upload/image/${filename}`, { mode: 'cors', credentials: 'omit' })
           if (response.ok) {
             const blob = await response.blob()
             const reader = new FileReader()
