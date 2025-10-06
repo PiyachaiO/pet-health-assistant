@@ -39,13 +39,32 @@ router.use((req, res, next) => {
 // Get all articles (public)
 router.get("/", async (req, res) => {
   try {
-    const { data, error } = await supabase
+    const { search, category, sort = 'created_at', dir = 'desc' } = req.query
+    let query = supabase
       .from("articles")
       .select(`
         *,
         users!author_id(full_name)
       `)
-      .order("created_at", { ascending: false })
+
+    // simple search by title or excerpt
+    if (search && search.trim()) {
+      query = query.ilike('title', `%${search}%`)
+    }
+
+    if (category && category.trim()) {
+      query = query.eq('category', category)
+    }
+
+    // sort
+    const ascending = String(dir).toLowerCase() === 'asc'
+    if (sort === 'title') {
+      query = query.order('title', { ascending })
+    } else {
+      query = query.order('created_at', { ascending })
+    }
+
+    const { data, error } = await query
 
     if (error) {
       return res.status(400).json({

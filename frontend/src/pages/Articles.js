@@ -12,13 +12,15 @@ const Articles = () => {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("")
+  const [sortKey, setSortKey] = useState('created_at') // created_at | title
+  const [sortDir, setSortDir] = useState('desc')
   const [deletingId, setDeletingId] = useState(null)
 
   const categories = ["ทั้งหมด", "การดูแลทั่วไป", "โภชนาการ", "สุขภาพและโรคภัย", "พฤติกรรม", "การฝึก"]
 
   useEffect(() => {
     fetchArticles()
-  }, [searchTerm, selectedCategory])
+  }, [searchTerm, selectedCategory, sortKey, sortDir])
 
   const fetchArticles = async () => {
     try {
@@ -27,6 +29,8 @@ const Articles = () => {
       if (selectedCategory && selectedCategory !== "ทั้งหมด") {
         params.category = selectedCategory
       }
+      params.sort = sortKey
+      params.dir = sortDir
 
       const response = await apiClient.get("/articles", { params })
       setArticles(response.data || [])
@@ -99,6 +103,29 @@ const Articles = () => {
                 {category}
               </button>
             ))}
+            <div className="flex items-center space-x-2 ml-2">
+              <span className="text-sm text-gray-600">เรียงโดย:</span>
+              <select
+                className="form-select"
+                value={sortKey}
+                onChange={(e) => setSortKey(e.target.value)}
+              >
+                <option value="created_at">ล่าสุด</option>
+                <option value="title">ชื่อเรื่อง</option>
+              </select>
+              <select
+                className="form-select"
+                value={sortDir}
+                onChange={(e) => setSortDir(e.target.value)}
+              >
+                <option value="desc">ใหม่ → เก่า</option>
+                <option value="asc">เก่า → ใหม่</option>
+              </select>
+              <button
+                onClick={() => { setSearchTerm(""); setSelectedCategory(""); setSortKey('created_at'); setSortDir('desc'); }}
+                className="px-3 py-2 rounded-lg border border-gray-200 bg-white hover:shadow-sm text-sm"
+              >รีเซ็ต</button>
+            </div>
           </div>
         </div>
 
