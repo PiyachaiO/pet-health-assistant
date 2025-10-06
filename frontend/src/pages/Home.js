@@ -108,29 +108,44 @@ const Home = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gradient-to-br from-green-50 via-blue-50 to-purple-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">ตัวเลขที่น่าประทับใจ</h2>
             <p className="text-xl text-gray-600">ความไว้วางใจจากเจ้าของสัตว์เลี้ยงทั่วประเทศ</p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-green-500 mb-2">10,000+</div>
-              <div className="text-gray-600">สัตว์เลี้ยงที่ได้รับการดูแล</div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Heart className="h-8 w-8 text-green-500" />
+              </div>
+              <div className="text-4xl md:text-5xl font-bold text-green-500 mb-2">10,000+</div>
+              <div className="text-gray-600 font-medium">สัตว์เลี้ยงที่ได้รับการดูแล</div>
             </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-blue-500 mb-2">5,000+</div>
-              <div className="text-gray-600">เจ้าของที่ไว้วางใจ</div>
+            
+            <div className="text-center bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="h-8 w-8 text-blue-500" />
+              </div>
+              <div className="text-4xl md:text-5xl font-bold text-blue-500 mb-2">5,000+</div>
+              <div className="text-gray-600 font-medium">เจ้าของที่ไว้วางใจ</div>
             </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-purple-500 mb-2">100+</div>
-              <div className="text-gray-600">สัตวแพทย์ผู้เชี่ยวชาญ</div>
+            
+            <div className="text-center bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <BarChart3 className="h-8 w-8 text-purple-500" />
+              </div>
+              <div className="text-4xl md:text-5xl font-bold text-purple-500 mb-2">100+</div>
+              <div className="text-gray-600 font-medium">สัตวแพทย์ผู้เชี่ยวชาญ</div>
             </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-orange-500 mb-2">99%</div>
-              <div className="text-gray-600">ความพึงพอใจ</div>
+            
+            <div className="text-center bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Bell className="h-8 w-8 text-orange-500" />
+              </div>
+              <div className="text-4xl md:text-5xl font-bold text-orange-500 mb-2">99%</div>
+              <div className="text-gray-600 font-medium">ความพึงพอใจ</div>
             </div>
           </div>
         </div>
