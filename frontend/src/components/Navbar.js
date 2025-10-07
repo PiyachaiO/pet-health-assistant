@@ -53,7 +53,7 @@ const Navbar = () => {
     } else {
       setProfileImage(null)
     }
-  }, [user?.profile_picture_url])
+  }, [user?.profile_picture_url, user?.id]) // Add user.id to force refresh when user changes
 
   const handleLogout = () => {
     logout()

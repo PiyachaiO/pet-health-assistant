@@ -127,6 +127,8 @@ export const AuthProvider = ({ children }) => {
 
   const refreshUser = async () => {
     try {
+      // Force refresh by clearing current user first
+      setUser(null)
       await fetchUser()
     } catch (error) {
       console.error("Failed to refresh user:", error)

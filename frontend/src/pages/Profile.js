@@ -70,6 +70,13 @@ const Profile = () => {
 
   const handleImageUploaded = async (imageUrl) => {
     setProfileImage(imageUrl)
+    // Immediately update user context with new image URL
+    if (user) {
+      updateUser({
+        ...user,
+        profile_picture_url: imageUrl
+      })
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -83,22 +90,22 @@ const Profile = () => {
         profile_picture_url: profileImage || null
       }
 
-      await apiClient.put("/users/profile", updateData)
+      const response = await apiClient.put("/users/profile", updateData)
       
-      // Update user context directly first
-      updateUser({
-        ...user,
-        ...formData,
-        profile_picture_url: profileImage
-      })
-
-      // Then try to refresh user data to get updated profile picture
-      try {
-        await refreshUser()
-      } catch (error) {
-        console.error("Failed to refresh user data:", error)
-        // Don't show error to user since the update was successful
+      // Update user context with the response data from server
+      if (response.data) {
+        updateUser(response.data)
+      } else {
+        // Fallback: update with local data
+        updateUser({
+          ...user,
+          ...formData,
+          profile_picture_url: profileImage
+        })
       }
+
+      // Force refresh user data to ensure all components get updated
+      await refreshUser()
 
       setMessage("บันทึกข้อมูลสำเร็จแล้ว")
     } catch (error) {
