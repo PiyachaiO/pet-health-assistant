@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Link } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import apiClient from "../services/api"
 import {
@@ -235,14 +236,14 @@ const AdminDashboard = () => {
             </div>
             {/* Quick Actions */}
             <div className="hidden md:flex items-center space-x-3">
-              <a href="/admin/users" className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+              <Link to="/users" className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                 <Users className="h-4 w-4 text-blue-500" />
                 <span className="text-sm font-medium">จัดการผู้ใช้</span>
-              </a>
-              <a href="/admin/articles" className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+              </Link>
+              <Link to="/articles" className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                 <FileText className="h-4 w-4 text-purple-500" />
                 <span className="text-sm font-medium">จัดการบทความ</span>
-              </a>
+              </Link>
             </div>
           </div>
         </div>

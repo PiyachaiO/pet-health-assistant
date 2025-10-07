@@ -100,13 +100,6 @@ const ArticleDetail = () => {
           </div>
         </div>
 
-        {/* Related Articles */}
-        <div className="mt-12">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">บทความที่เกี่ยวข้อง</h3>
-          <div className="text-center py-8 text-gray-600">
-            <p>กำลังโหลดบทความที่เกี่ยวข้อง...</p>
-          </div>
-        </div>
       </div>
     </div>
   )

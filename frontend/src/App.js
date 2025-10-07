@@ -56,7 +56,8 @@ function App() {
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requiredRole={["admin"]}><AdminDashboard /></ProtectedRoute>} />
             <Route path="/vet" element={<ProtectedRoute requiredRole="vet"><VetDashboard /></ProtectedRoute>} />
-            <Route path="/admin/articles" element={<ProtectedRoute requiredRole={["admin", "veterinarian"]}><ManageArticles /></ProtectedRoute>} />
+            {/* Redirect old admin routes to main articles page */}
+            <Route path="/admin/articles" element={<ProtectedRoute requiredRole={["admin", "veterinarian"]}><Articles /></ProtectedRoute>} />
             <Route path="/admin/articles/new" element={<ProtectedRoute requiredRole={["admin", "veterinarian"]}><ArticleForm /></ProtectedRoute>} />
             <Route path="/admin/articles/edit/:id" element={<ProtectedRoute requiredRole={["admin", "veterinarian"]}><ArticleForm /></ProtectedRoute>} />
           </Routes>
