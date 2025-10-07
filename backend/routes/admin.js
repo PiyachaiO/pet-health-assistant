@@ -172,6 +172,24 @@ router.patch("/appointments/:id/approve", requireAdmin, validationRules.uuidPara
         })
       }
 
+      // แจ้งเตือนผู้ใช้เมื่อการนัดหมายถูกปฏิเสธ
+      try {
+        const { notifyAppointmentStatusChanged } = require("../services/notificationService")
+        await notifyAppointmentStatusChanged(data.user_id, {
+          id: data.id,
+          status: "cancelled",
+          appointment_date: data.appointment_date,
+          appointment_time: data.appointment_time,
+          appointment_type: data.appointment_type,
+          pet_id: data.pet_id,
+          rejection_reason: rejection_reason
+        })
+        console.log(`[Admin] ✅ Sent rejection notification to user ${data.user_id}`)
+      } catch (notificationError) {
+        console.error("Failed to send rejection notification:", notificationError)
+        // ไม่ return error เพราะการปฏิเสธสำเร็จแล้ว
+      }
+
       res.json({
         message: "Appointment rejected successfully",
         appointment: data,
@@ -200,6 +218,23 @@ router.patch("/appointments/:id/approve", requireAdmin, validationRules.uuidPara
           error: error.message,
           code: "APPOINTMENT_APPROVAL_FAILED",
         })
+      }
+
+      // แจ้งเตือนผู้ใช้เมื่อการนัดหมายได้รับการอนุมัติ
+      try {
+        const { notifyAppointmentStatusChanged } = require("../services/notificationService")
+        await notifyAppointmentStatusChanged(data.user_id, {
+          id: data.id,
+          status: "confirmed",
+          appointment_date: data.appointment_date,
+          appointment_time: data.appointment_time,
+          appointment_type: data.appointment_type,
+          pet_id: data.pet_id
+        })
+        console.log(`[Admin] ✅ Sent approval notification to user ${data.user_id}`)
+      } catch (notificationError) {
+        console.error("Failed to send approval notification:", notificationError)
+        // ไม่ return error เพราะการอนุมัติสำเร็จแล้ว
       }
 
       res.json({

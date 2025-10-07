@@ -32,6 +32,13 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchAdminData()
+    
+    // รีเฟรชข้อมูลทุก 30 วินาที
+    const interval = setInterval(() => {
+      fetchAdminData()
+    }, 30000)
+    
+    return () => clearInterval(interval)
   }, [])
 
   // Load user images when users data changes
@@ -173,6 +180,11 @@ const AdminDashboard = () => {
       setShowApprovalModal(false)
       setSelectedApproval(null)
       alert(`${approvalAction === "approve" ? "อนุมัติ" : "ปฏิเสธ"}สำเร็จแล้ว`)
+      
+      // รีเฟรชข้อมูลสถิติหลังจากอนุมัติ/ปฏิเสธ
+      setTimeout(() => {
+        fetchAdminData()
+      }, 1000)
     } catch (error) {
       console.error("Failed to process approval:", error)
       alert(`เกิดข้อผิดพลาด: ${error.response?.data?.error || error.message}`)
