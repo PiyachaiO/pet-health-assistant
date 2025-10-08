@@ -113,31 +113,22 @@ async function notifyHealthRecordUpdated(userId, healthRecordData) {
  */
 async function notifyAppointmentStatusChanged(userId, appointmentData) {
   const statusMessages = {
-    confirmed: 'นัดหมายของคุณได้รับการอนุมัติแล้ว',
-    cancelled: 'นัดหมายของคุณถูกปฏิเสธ',
+    confirmed: 'นัดหมายของคุณได้รับการยืนยันแล้ว',
+    cancelled: 'นัดหมายของคุณถูกยกเลิก',
     completed: 'นัดหมายของคุณเสร็จสิ้นแล้ว'
   };
 
-  let message = statusMessages[appointmentData.status] || 'สถานะนัดหมายของคุณมีการเปลี่ยนแปลง';
-  
-  // เพิ่มเหตุผลการปฏิเสธถ้ามี
-  if (appointmentData.status === 'cancelled' && appointmentData.rejection_reason) {
-    message += ` เหตุผล: ${appointmentData.rejection_reason}`;
-  }
-
   const notification = {
     user_id: userId,
-    pet_id: appointmentData.pet_id || null,
+    pet_id: appointmentData.pet_id || null, // เพิ่ม pet_id
     notification_type: 'appointment_reminder',
     title: 'สถานะนัดหมายเปลี่ยนแปลง',
-    message: message,
+    message: statusMessages[appointmentData.status] || 'สถานะนัดหมายของคุณมีการเปลี่ยนแปลง',
     priority: appointmentData.status === 'cancelled' ? 'high' : 'medium',
     due_date: appointmentData.appointment_date,
     is_read: false,
     is_completed: false
   };
-
-  console.log('[notifyAppointmentStatusChanged] Creating notification:', notification);
 
   // บันทึกลงฐานข้อมูล
   const { data, error } = await supabase
@@ -146,15 +137,7 @@ async function notifyAppointmentStatusChanged(userId, appointmentData) {
     .select()
     .single();
 
-  if (error) {
-    console.error('[notifyAppointmentStatusChanged] Database error:', error);
-    return { data, error };
-  }
-
-  if (data) {
-    console.log('[notifyAppointmentStatusChanged] Notification saved to DB:', data.id);
-    console.log('[notifyAppointmentStatusChanged] Emitting to user:', userId);
-    
+  if (!error && data) {
     // ส่งผ่าน Socket.IO
     emitToUser(userId, 'notification:appointment', {
       ...data,
