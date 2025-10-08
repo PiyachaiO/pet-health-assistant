@@ -283,8 +283,7 @@ const NutritionRecommendation = () => {
                         <strong>โดย:</strong> {plan.veterinarian?.full_name || 'ไม่ระบุ'}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {new Date(plan.start_date).toLocaleDateString('th-TH')} 
-                        {plan.end_date && ` - ${new Date(plan.end_date).toLocaleDateString('th-TH')}`}
+                        เริ่ม: {new Date(plan.start_date).toLocaleDateString('th-TH')}
                       </p>
                     </div>
                   ))}
@@ -336,10 +335,9 @@ const NutritionRecommendation = () => {
                     <span className="text-sm font-medium text-gray-900">{vetRecommendation.custom_calories || '-'} kcal</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">ระยะเวลา:</span>
+                    <span className="text-sm text-gray-600">วันที่เริ่มแผน:</span>
                     <span className="text-sm font-medium text-gray-900">
                       {new Date(vetRecommendation.start_date).toLocaleDateString('th-TH')}
-                      {vetRecommendation.end_date && ` - ${new Date(vetRecommendation.end_date).toLocaleDateString('th-TH')}`}
                     </span>
                   </div>
                 </div>

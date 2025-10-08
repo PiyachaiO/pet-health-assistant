@@ -8,8 +8,6 @@ const VetNutritionForm = ({ onClose, onNutritionAdded }) => {
   const [formData, setFormData] = useState({
     user_id: "",
     pet_id: "",
-    species: "",
-    age_range: "",
     instructions: "",
     start_date: "",
     end_date: "",
@@ -77,8 +75,8 @@ const VetNutritionForm = ({ onClose, onNutritionAdded }) => {
     try {
       // สร้าง nutrition guideline ก่อน
       const guidelineData = {
-        species: formData.species,
-        age_range: formData.age_range,
+        species: "general", // ค่าเริ่มต้น
+        age_range: "general", // ค่าเริ่มต้น
         daily_calories: 300, // ค่าเริ่มต้น
         protein_percentage: 25.0, // ค่าเริ่มต้น
         fat_percentage: 15.0, // ค่าเริ่มต้น
@@ -223,50 +221,6 @@ const VetNutritionForm = ({ onClose, onNutritionAdded }) => {
               <h3 className="text-lg font-semibold text-gray-900">ข้อมูลโภชนาการ</h3>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="species" className="block text-sm font-medium text-gray-700 mb-2">
-                  ชนิดสัตว์ *
-                </label>
-                <select
-                  id="species"
-                  name="species"
-                  value={formData.species}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required
-                >
-                  <option value="">เลือกชนิดสัตว์</option>
-                  <option value="dog">สุนัข</option>
-                  <option value="cat">แมว</option>
-                  <option value="bird">นก</option>
-                  <option value="rabbit">กระต่าย</option>
-                  <option value="other">อื่นๆ</option>
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="age_range" className="block text-sm font-medium text-gray-700 mb-2">
-                  ช่วงอายุ *
-                </label>
-                <select
-                  id="age_range"
-                  name="age_range"
-                  value={formData.age_range}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required
-                >
-                  <option value="">เลือกช่วงอายุ</option>
-                  <option value="0-6 months">0-6 เดือน</option>
-                  <option value="6-12 months">6-12 เดือน</option>
-                  <option value="1-2 years">1-2 ปี</option>
-                  <option value="2-5 years">2-5 ปี</option>
-                  <option value="5+ years">5+ ปี</option>
-                </select>
-              </div>
-
-            </div>
 
             <div>
               <label htmlFor="instructions" className="block text-sm font-medium text-gray-700 mb-2">
