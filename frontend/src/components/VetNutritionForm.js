@@ -9,8 +9,6 @@ const VetNutritionForm = ({ onClose, onNutritionAdded }) => {
     user_id: "",
     pet_id: "",
     instructions: "",
-    start_date: "",
-    end_date: "",
   })
   const [users, setUsers] = useState([])
   const [pets, setPets] = useState([])
@@ -91,8 +89,8 @@ const VetNutritionForm = ({ onClose, onNutritionAdded }) => {
       const planData = {
         pet_id: formData.pet_id,
         guideline_id: guidelineId,
-        start_date: formData.start_date,
-        end_date: formData.end_date || null,
+        start_date: new Date().toISOString().split('T')[0], // วันที่ปัจจุบัน
+        end_date: null, // ไม่มีวันสิ้นสุด
         custom_instructions: formData.instructions,
       }
 
@@ -238,47 +236,6 @@ const VetNutritionForm = ({ onClose, onNutritionAdded }) => {
             </div>
           </div>
 
-          {/* ระยะเวลาแผน */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Calendar className="h-5 w-5 text-purple-500" />
-              <h3 className="text-lg font-semibold text-gray-900">ระยะเวลาแผน</h3>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="start_date" className="block text-sm font-medium text-gray-700 mb-2">
-                  วันที่เริ่มต้น *
-                </label>
-                <input
-                  type="date"
-                  id="start_date"
-                  name="start_date"
-                  value={formData.start_date}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="end_date" className="block text-sm font-medium text-gray-700 mb-2">
-                  วันที่สิ้นสุด (ไม่บังคับ)
-                </label>
-                <input
-                  type="date"
-                  id="end_date"
-                  name="end_date"
-                  value={formData.end_date}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  หากไม่ระบุ จะเป็นแผนระยะยาว
-                </p>
-              </div>
-            </div>
-          </div>
 
           {/* ปุ่มส่งคำขอ */}
           <div className="flex space-x-3 pt-4">
