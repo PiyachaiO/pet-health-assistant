@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import { useSocket } from "../contexts/SocketContext"
-import { Menu, X, Calendar, Bell, FileText, Utensils, LogOut, PawPrint, Settings, User, Users, Shield, LayoutDashboard } from "lucide-react"
+import { Menu, X, Calendar, Bell, FileText, Utensils, LogOut, PawPrint, Settings, User, Users, Shield, LayoutDashboard, UserPlus } from "lucide-react"
 
 const Navbar = () => {
   const { user, logout } = useAuth()
@@ -97,6 +97,12 @@ const Navbar = () => {
         
         // Nutrition - available for all authenticated users
         { name: "โภชนาการ", href: "/nutrition", icon: Utensils },
+        
+        // Vet Application - only for regular users
+        ...(user.role === "user" 
+          ? [{ name: "ขอเป็นสัตวแพทย์", href: "/vet-application", icon: UserPlus }]
+          : []
+        ),
       ]
     : []
 

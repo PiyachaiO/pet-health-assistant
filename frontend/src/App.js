@@ -19,6 +19,7 @@ import Profile from './pages/Profile'; // Import Profile
 import ManageArticles from './pages/ManageArticles'; // Import ManageArticles
 import ArticleForm from './pages/ArticleForm'; // Import ArticleForm
 import Pets from './pages/Pets'; // Import Pets
+import VetApplicationPage from './pages/VetApplicationPage'; // Import VetApplicationPage
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { SocketProvider } from './contexts/SocketContext';
@@ -54,6 +55,7 @@ function App() {
             <Route path="/nutrition/guidelines" element={<ProtectedRoute><NutritionRecommendation /></ProtectedRoute>} />
             <Route path="/pets/:petId/nutrition" element={<ProtectedRoute><NutritionRecommendation /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+            <Route path="/vet-application" element={<ProtectedRoute><VetApplicationPage /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requiredRole={["admin"]}><AdminDashboard /></ProtectedRoute>} />
             <Route path="/vet" element={<ProtectedRoute requiredRole="vet"><VetDashboard /></ProtectedRoute>} />
             {/* Redirect old admin routes to main articles page */}

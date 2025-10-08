@@ -15,7 +15,9 @@ import {
   XCircle,
   Clock,
   AlertTriangle,
+  UserPlus,
 } from "lucide-react"
+import AdminVetApplications from "../components/AdminVetApplications"
 
 const AdminDashboard = () => {
   const { user } = useAuth()
@@ -87,10 +89,11 @@ const AdminDashboard = () => {
 
   const fetchAdminData = async () => {
     try {
-      const [statsResponse, usersResponse, approvalsResponse] = await Promise.allSettled([
+      const [statsResponse, usersResponse, approvalsResponse, vetAppsStatsResponse] = await Promise.allSettled([
         apiClient.get("/admin/statistics"),
         apiClient.get("/admin/users"),
         apiClient.get("/admin/pending-approvals"),
+        apiClient.get("/vet-applications/admin/stats"),
       ])
 
       // Process stats
@@ -106,6 +109,15 @@ const AdminDashboard = () => {
       // Process approvals
       if (approvalsResponse.status === 'fulfilled') {
         setPendingApprovals(approvalsResponse.value.data)
+      }
+
+      // Process vet applications stats
+      if (vetAppsStatsResponse.status === 'fulfilled') {
+        const vetAppsStats = vetAppsStatsResponse.value.data
+        setStats(prevStats => ({
+          ...prevStats,
+          pending_vet_applications: vetAppsStats.pending_applications || 0
+        }))
       }
     } catch (error) {
       console.error("Failed to fetch admin data:", error)
@@ -375,6 +387,7 @@ const AdminDashboard = () => {
             {[
               { key: "overview", label: "ภาพรวม", icon: Users, count: null },
               { key: "approvals", label: "การอนุมัติ", icon: CheckCircle, count: stats?.pending_appointments || 0 },
+              { key: "vet-applications", label: "คำขอเป็นสัตวแพทย์", icon: UserPlus, count: stats?.pending_vet_applications || 0 },
               { key: "users", label: "ผู้ใช้", icon: UserCheck, count: users.length },
             ].map((tab) => (
               <button
@@ -556,6 +569,10 @@ const AdminDashboard = () => {
               )}
             </div>
           </div>
+        )}
+
+        {activeTab === "vet-applications" && (
+          <AdminVetApplications />
         )}
 
         {activeTab === "users" && (

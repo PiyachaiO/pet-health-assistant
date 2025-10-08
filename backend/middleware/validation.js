@@ -199,6 +199,61 @@ const validationRules = {
     param(paramName).isUUID().withMessage(`Please provide a valid ${paramName} ID`),
     handleValidationErrors,
   ],
+
+  vetApplicationSubmission: [
+    body("license_number")
+      .trim()
+      .isLength({ min: 3, max: 100 })
+      .withMessage("License number must be between 3 and 100 characters"),
+    body("experience_years")
+      .isInt({ min: 0, max: 50 })
+      .withMessage("Experience years must be between 0 and 50"),
+    body("workplace")
+      .trim()
+      .isLength({ min: 3, max: 255 })
+      .withMessage("Workplace must be between 3 and 255 characters"),
+    body("specialization")
+      .optional()
+      .trim()
+      .isLength({ max: 100 })
+      .withMessage("Specialization must be less than 100 characters"),
+    body("additional_info")
+      .optional()
+      .trim()
+      .isLength({ max: 500 })
+      .withMessage("Additional info must be less than 500 characters"),
+    body("license_document_url")
+      .optional()
+      .isURL()
+      .withMessage("License document URL must be a valid URL"),
+    body("portfolio_url")
+      .optional()
+      .isURL()
+      .withMessage("Portfolio URL must be a valid URL"),
+    handleValidationErrors,
+  ],
+
+  vetApplicationApproval: [
+    body("admin_notes")
+      .optional()
+      .trim()
+      .isLength({ max: 500 })
+      .withMessage("Admin notes must be less than 500 characters"),
+    handleValidationErrors,
+  ],
+
+  vetApplicationRejection: [
+    body("rejection_reason")
+      .trim()
+      .isLength({ min: 5, max: 500 })
+      .withMessage("Rejection reason must be between 5 and 500 characters"),
+    body("admin_notes")
+      .optional()
+      .trim()
+      .isLength({ max: 500 })
+      .withMessage("Admin notes must be less than 500 characters"),
+    handleValidationErrors,
+  ],
 }
 
 // Legacy validation functions (for backward compatibility)

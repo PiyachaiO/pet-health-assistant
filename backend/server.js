@@ -18,6 +18,7 @@ const uploadRoutes = require("./routes/upload")
 const cloudinaryUploadRoutes = require("./routes/cloudinary-upload")
 const adminRoutes = require("./routes/admin")
 const aiRoutes = require("./routes/ai")
+const vetApplicationRoutes = require("./routes/vetApplications")
 
 const { initializeSocket, getConnectedCount } = require("./config/socket")
 
@@ -128,6 +129,7 @@ app.use("/api/upload", uploadRoutes)
 app.use("/api/cloudinary", cloudinaryUploadRoutes)
 app.use("/api/admin", adminRoutes)
 app.use("/api/ai", aiRoutes)
+app.use("/api/vet-applications", vetApplicationRoutes)
 
 // Health check endpoint
 app.get("/api/health", async (req, res) => {
