@@ -10,10 +10,6 @@ const VetNutritionForm = ({ onClose, onNutritionAdded }) => {
     pet_id: "",
     species: "",
     age_range: "",
-    daily_calories: "",
-    protein_percentage: "",
-    fat_percentage: "",
-    feeding_frequency: "",
     instructions: "",
     start_date: "",
     end_date: "",
@@ -83,10 +79,10 @@ const VetNutritionForm = ({ onClose, onNutritionAdded }) => {
       const guidelineData = {
         species: formData.species,
         age_range: formData.age_range,
-        daily_calories: parseInt(formData.daily_calories),
-        protein_percentage: parseFloat(formData.protein_percentage),
-        fat_percentage: parseFloat(formData.fat_percentage),
-        feeding_frequency: parseInt(formData.feeding_frequency),
+        daily_calories: 300, // ค่าเริ่มต้น
+        protein_percentage: 25.0, // ค่าเริ่มต้น
+        fat_percentage: 15.0, // ค่าเริ่มต้น
+        feeding_frequency: 2, // ค่าเริ่มต้น
         instructions: formData.instructions,
       }
 
@@ -270,71 +266,6 @@ const VetNutritionForm = ({ onClose, onNutritionAdded }) => {
                 </select>
               </div>
 
-              <div>
-                <label htmlFor="daily_calories" className="block text-sm font-medium text-gray-700 mb-2">
-                  แคลอรี่ต่อวัน *
-                </label>
-                <input
-                  type="number"
-                  id="daily_calories"
-                  name="daily_calories"
-                  value={formData.daily_calories}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="เช่น 300"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="feeding_frequency" className="block text-sm font-medium text-gray-700 mb-2">
-                  จำนวนมื้อต่อวัน *
-                </label>
-                <input
-                  type="number"
-                  id="feeding_frequency"
-                  name="feeding_frequency"
-                  value={formData.feeding_frequency}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="เช่น 2"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="protein_percentage" className="block text-sm font-medium text-gray-700 mb-2">
-                  เปอร์เซ็นต์โปรตีน *
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  id="protein_percentage"
-                  name="protein_percentage"
-                  value={formData.protein_percentage}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="เช่น 25.0"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="fat_percentage" className="block text-sm font-medium text-gray-700 mb-2">
-                  เปอร์เซ็นต์ไขมัน *
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  id="fat_percentage"
-                  name="fat_percentage"
-                  value={formData.fat_percentage}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="เช่น 15.0"
-                  required
-                />
-              </div>
             </div>
 
             <div>

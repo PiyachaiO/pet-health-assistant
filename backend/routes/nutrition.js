@@ -11,7 +11,14 @@ const router = express.Router()
 router.use(authenticateToken)
 
 // Create nutrition guideline (for veterinarians)
-router.post("/guidelines", requireRole(["veterinarian", "admin"]), async (req, res) => {
+router.post("/guidelines", async (req, res) => {
+  // Check role
+  if (req.user.role !== "veterinarian" && req.user.role !== "admin") {
+    return res.status(403).json({
+      error: "Access denied. Veterinarian or Admin role required.",
+      code: "ACCESS_DENIED",
+    })
+  }
   try {
     const {
       species,
@@ -62,7 +69,14 @@ router.post("/guidelines", requireRole(["veterinarian", "admin"]), async (req, r
 })
 
 // Create pet nutrition plan (for veterinarians)
-router.post("/plans", requireRole(["veterinarian", "admin"]), async (req, res) => {
+router.post("/plans", async (req, res) => {
+  // Check role
+  if (req.user.role !== "veterinarian" && req.user.role !== "admin") {
+    return res.status(403).json({
+      error: "Access denied. Veterinarian or Admin role required.",
+      code: "ACCESS_DENIED",
+    })
+  }
   try {
     const {
       pet_id,
