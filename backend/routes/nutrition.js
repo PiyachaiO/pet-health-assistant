@@ -10,6 +10,93 @@ const router = express.Router()
 // Apply authentication middleware for all routes
 router.use(authenticateToken)
 
+// Create pet nutrition plan (for veterinarians)
+router.post("/plans", requireRole(["veterinarian", "admin"]), async (req, res) => {
+  try {
+    const {
+      pet_id,
+      guideline_id,
+      start_date,
+      end_date,
+      custom_instructions
+    } = req.body
+
+    // ตรวจสอบว่า pet มีอยู่จริง
+    const { data: pet, error: petError } = await supabase
+      .from("pets")
+      .select("id, name, user_id")
+      .eq("id", pet_id)
+      .single()
+
+    if (petError || !pet) {
+      return res.status(404).json({
+        error: "Pet not found",
+        code: "PET_NOT_FOUND",
+      })
+    }
+
+    // ตรวจสอบว่า guideline มีอยู่จริง
+    const { data: guideline, error: guidelineError } = await supabase
+      .from("nutrition_guidelines")
+      .select("id")
+      .eq("id", guideline_id)
+      .single()
+
+    if (guidelineError || !guideline) {
+      return res.status(404).json({
+        error: "Nutrition guideline not found",
+        code: "GUIDELINE_NOT_FOUND",
+      })
+    }
+
+    // สร้าง pet nutrition plan
+    const { data, error } = await supabase
+      .from("pet_nutrition_plans")
+      .insert({
+        pet_id,
+        guideline_id,
+        veterinarian_id: req.user.id,
+        start_date,
+        end_date,
+        custom_instructions,
+        is_active: true
+      })
+      .select(`
+        *,
+        pets(name, species, user_id),
+        veterinarian:users!pet_nutrition_plans_veterinarian_id_fkey(full_name, email)
+      `)
+      .single()
+
+    if (error) {
+      console.error("Pet nutrition plan creation error:", error)
+      return res.status(400).json({
+        error: error.message,
+        code: "PLAN_CREATION_FAILED",
+      })
+    }
+
+    // ส่ง notification ไปยังเจ้าของสัตว์เลี้ยง
+    try {
+      await notifyNutritionPlanCreated(pet.user_id, data.id, pet.name)
+    } catch (notificationError) {
+      console.error("Failed to send notification:", notificationError)
+      // ไม่ return error เพราะ plan สร้างสำเร็จแล้ว
+    }
+
+    res.status(201).json({
+      message: "Pet nutrition plan created successfully",
+      plan: data
+    })
+  } catch (error) {
+    console.error("Pet nutrition plan creation error:", error)
+    res.status(500).json({
+      error: "Failed to create pet nutrition plan",
+      code: "INTERNAL_ERROR",
+    })
+  }
+})
+
 // Get nutrition recommendations for user's pets (owners can read)
 router.get("/recommendations", async (req, res) => {
   try {

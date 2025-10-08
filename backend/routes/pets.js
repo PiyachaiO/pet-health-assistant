@@ -44,6 +44,45 @@ router.get("/", async (req, res) => {
   }
 })
 
+// Get pets by user ID (for veterinarians)
+router.get("/user/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params
+
+    // ตรวจสอบสิทธิ์ - เฉพาะสัตวแพทย์และแอดมิน
+    if (req.user.role !== "veterinarian" && req.user.role !== "admin") {
+      return res.status(403).json({
+        error: "Access denied. Veterinarian or Admin role required.",
+        code: "ACCESS_DENIED",
+      })
+    }
+
+    const { data, error } = await supabase
+      .from("pets")
+      .select(`
+        *,
+        users!pets_user_id_fkey(full_name, email)
+      `)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+
+    if (error) {
+      return res.status(400).json({
+        error: error.message,
+        code: "PETS_FETCH_FAILED",
+      })
+    }
+
+    res.json(data)
+  } catch (error) {
+    console.error("Pets fetch by user error:", error)
+    res.status(500).json({
+      error: "Failed to fetch pets by user",
+      code: "INTERNAL_ERROR",
+    })
+  }
+})
+
 // Create new pet
 router.post("/", validationRules.petCreation, validateRequest, async (req, res) => {
   try {

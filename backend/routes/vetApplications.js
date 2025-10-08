@@ -84,9 +84,12 @@ router.post("/", validationRules.vetApplicationSubmission, validateRequest, asyn
     
     if (error) {
       console.error("Vet application creation error:", error)
+      console.error("Request body:", req.body)
+      console.error("User ID:", userId)
       return res.status(400).json({
         error: error.message,
         code: "VET_APPLICATION_CREATION_FAILED",
+        details: error
       })
     }
     
