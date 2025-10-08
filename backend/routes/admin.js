@@ -172,22 +172,35 @@ router.patch("/appointments/:id/approve", requireAdmin, validationRules.uuidPara
         })
       }
 
-      // แจ้งเตือนผู้ใช้เมื่อการนัดหมายถูกปฏิเสธ
-      try {
-        const { notifyAppointmentStatusChanged } = require("../services/notificationService")
-        await notifyAppointmentStatusChanged(data.user_id, {
-          id: data.id,
-          status: "cancelled",
-          appointment_date: data.appointment_date,
-          appointment_time: data.appointment_time,
-          appointment_type: data.appointment_type,
-          pet_id: data.pet_id,
-          rejection_reason: rejection_reason
-        })
-        console.log(`[Admin] ✅ Sent rejection notification to user ${data.user_id}`)
-      } catch (notificationError) {
-        console.error("Failed to send rejection notification:", notificationError)
-        // ไม่ return error เพราะการปฏิเสธสำเร็จแล้ว
+      // Send notification to user and vet about rejection
+      if (data.user && data.veterinarian) {
+        const notificationData = {
+          user_id: data.user_id,
+          title: "การนัดหมายถูกปฏิเสธ",
+          message: `การนัดหมายสำหรับ ${data.pet?.name} ถูกปฏิเสธ${rejection_reason ? `: ${rejection_reason}` : ''}`,
+          type: "appointment_rejected",
+          related_id: data.id,
+          created_at: new Date().toISOString()
+        }
+
+        const vetNotificationData = {
+          user_id: data.veterinarian_id,
+          title: "การนัดหมายถูกปฏิเสธ",
+          message: `การนัดหมายสำหรับ ${data.pet?.name} (${data.user?.full_name}) ถูกปฏิเสธ${rejection_reason ? `: ${rejection_reason}` : ''}`,
+          type: "appointment_rejected",
+          related_id: data.id,
+          created_at: new Date().toISOString()
+        }
+
+        // Insert notifications
+        await supabase.from("notifications").insert([notificationData, vetNotificationData])
+        
+        // Send real-time notifications
+        const io = req.app.get('io')
+        if (io) {
+          io.to(`user_${data.user_id}`).emit('notification', notificationData)
+          io.to(`user_${data.veterinarian_id}`).emit('notification', vetNotificationData)
+        }
       }
 
       res.json({
@@ -220,21 +233,35 @@ router.patch("/appointments/:id/approve", requireAdmin, validationRules.uuidPara
         })
       }
 
-      // แจ้งเตือนผู้ใช้เมื่อการนัดหมายได้รับการอนุมัติ
-      try {
-        const { notifyAppointmentStatusChanged } = require("../services/notificationService")
-        await notifyAppointmentStatusChanged(data.user_id, {
-          id: data.id,
-          status: "confirmed",
-          appointment_date: data.appointment_date,
-          appointment_time: data.appointment_time,
-          appointment_type: data.appointment_type,
-          pet_id: data.pet_id
-        })
-        console.log(`[Admin] ✅ Sent approval notification to user ${data.user_id}`)
-      } catch (notificationError) {
-        console.error("Failed to send approval notification:", notificationError)
-        // ไม่ return error เพราะการอนุมัติสำเร็จแล้ว
+      // Send notification to user and vet about approval
+      if (data.user && data.veterinarian) {
+        const notificationData = {
+          user_id: data.user_id,
+          title: "การนัดหมายได้รับการอนุมัติ",
+          message: `การนัดหมายสำหรับ ${data.pet?.name} ได้รับการอนุมัติแล้ว`,
+          type: "appointment_approved",
+          related_id: data.id,
+          created_at: new Date().toISOString()
+        }
+
+        const vetNotificationData = {
+          user_id: data.veterinarian_id,
+          title: "การนัดหมายได้รับการอนุมัติ",
+          message: `การนัดหมายสำหรับ ${data.pet?.name} (${data.user?.full_name}) ได้รับการอนุมัติแล้ว`,
+          type: "appointment_approved",
+          related_id: data.id,
+          created_at: new Date().toISOString()
+        }
+
+        // Insert notifications
+        await supabase.from("notifications").insert([notificationData, vetNotificationData])
+        
+        // Send real-time notifications
+        const io = req.app.get('io')
+        if (io) {
+          io.to(`user_${data.user_id}`).emit('notification', notificationData)
+          io.to(`user_${data.veterinarian_id}`).emit('notification', vetNotificationData)
+        }
       }
 
       res.json({

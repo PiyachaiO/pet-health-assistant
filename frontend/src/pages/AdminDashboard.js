@@ -34,7 +34,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchAdminData()
     
-    // รีเฟรชข้อมูลทุก 30 วินาที
+    // Auto refresh data every 30 seconds
     const interval = setInterval(() => {
       fetchAdminData()
     }, 30000)
@@ -171,10 +171,8 @@ const AdminDashboard = () => {
       setSelectedApproval(null)
       alert(`${approvalAction === "approve" ? "อนุมัติ" : "ปฏิเสธ"}สำเร็จแล้ว`)
       
-      // รีเฟรชข้อมูลสถิติหลังจากอนุมัติ/ปฏิเสธ
-      setTimeout(() => {
-        fetchAdminData()
-      }, 1000)
+      // Refresh data to get updated statistics
+      await fetchAdminData()
     } catch (error) {
       console.error("Failed to process approval:", error)
       alert(`เกิดข้อผิดพลาด: ${error.response?.data?.error || error.message}`)
@@ -248,6 +246,15 @@ const AdminDashboard = () => {
             </div>
             {/* Quick Actions */}
             <div className="hidden md:flex items-center space-x-3">
+              <button 
+                onClick={fetchAdminData}
+                className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+              >
+                <svg className="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span className="text-sm font-medium">รีเฟรช</span>
+              </button>
               <Link to="/users" className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                 <Users className="h-4 w-4 text-blue-500" />
                 <span className="text-sm font-medium">จัดการผู้ใช้</span>
