@@ -10,6 +10,57 @@ const router = express.Router()
 // Apply authentication middleware for all routes
 router.use(authenticateToken)
 
+// Create nutrition guideline (for veterinarians)
+router.post("/guidelines", requireRole(["veterinarian", "admin"]), async (req, res) => {
+  try {
+    const {
+      species,
+      age_range,
+      daily_calories,
+      protein_percentage,
+      fat_percentage,
+      feeding_frequency,
+      instructions
+    } = req.body
+
+    // สร้าง nutrition guideline
+    const { data, error } = await supabase
+      .from("nutrition_guidelines")
+      .insert({
+        veterinarian_id: req.user.id,
+        species,
+        age_range,
+        daily_calories: parseInt(daily_calories),
+        protein_percentage: parseFloat(protein_percentage),
+        fat_percentage: parseFloat(fat_percentage),
+        feeding_frequency: parseInt(feeding_frequency),
+        instructions,
+        approval_status: "approved" // สัตวแพทย์สามารถสร้างได้เลย
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error("Nutrition guideline creation error:", error)
+      return res.status(400).json({
+        error: error.message,
+        code: "GUIDELINE_CREATION_FAILED",
+      })
+    }
+
+    res.status(201).json({
+      message: "Nutrition guideline created successfully",
+      guideline: data
+    })
+  } catch (error) {
+    console.error("Nutrition guideline creation error:", error)
+    res.status(500).json({
+      error: "Failed to create nutrition guideline",
+      code: "INTERNAL_ERROR",
+    })
+  }
+})
+
 // Create pet nutrition plan (for veterinarians)
 router.post("/plans", requireRole(["veterinarian", "admin"]), async (req, res) => {
   try {
