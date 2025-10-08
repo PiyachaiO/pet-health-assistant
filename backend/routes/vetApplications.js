@@ -121,7 +121,7 @@ router.post("/", validationRules.vetApplicationSubmission, validateRequest, asyn
       const io = req.app.get('io')
       if (io) {
         admins.forEach(admin => {
-          io.to(`user_${admin.id}`).emit('notification', {
+          io.to(`user:${admin.id}`).emit('notification', {
             ...notificationData,
             user_id: admin.id
           })
@@ -461,7 +461,7 @@ router.patch("/:id/approve", requireAdmin, validationRules.vetApplicationApprova
     // ส่ง real-time notification
     const io = req.app.get('io')
     if (io) {
-      io.to(`user_${application.user_id}`).emit('notification', notificationData)
+      io.to(`user:${application.user_id}`).emit('notification', notificationData)
     }
     
     res.json({
@@ -552,7 +552,7 @@ router.patch("/:id/reject", requireAdmin, validationRules.vetApplicationRejectio
     // ส่ง real-time notification
     const io = req.app.get('io')
     if (io) {
-      io.to(`user_${application.user_id}`).emit('notification', notificationData)
+      io.to(`user:${application.user_id}`).emit('notification', notificationData)
     }
     
     res.json({

@@ -27,7 +27,8 @@ const server = http.createServer(app)
 const PORT = process.env.PORT || 5000
 
 // Initialize Socket.IO
-initializeSocket(server)
+const io = initializeSocket(server)
+app.set('io', io)
 
 // CORS configuration
 app.use(cors({
