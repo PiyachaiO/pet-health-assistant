@@ -1,176 +1,431 @@
-import { useState, useEffect } from 'react';
-import apiClient from '../services/api';
-import { Save, X } from 'lucide-react';
+"use client"
 
-const VetNutritionForm = ({ petId, existingRecommendation, planId, onSave, onCancel }) => {
-  const [instructions, setInstructions] = useState(existingRecommendation || '');
-  const [calories, setCalories] = useState('');
-  const [selectedPetId, setSelectedPetId] = useState(petId || '');
-  const [pets, setPets] = useState([]);
-  const [loadingPets, setLoadingPets] = useState(false);
-  const [selectedPet, setSelectedPet] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+import { useState, useEffect } from "react"
+import apiClient from "../services/api"
+import { X, User, PawPrint, Calendar, Utensils, Clock, Target } from "lucide-react"
 
-  // ดึงข้อมูลสัตว์เลี้ยงทั้งหมด (สำหรับสัตวแพทย์)
+const VetNutritionForm = ({ onClose, onNutritionAdded }) => {
+  const [formData, setFormData] = useState({
+    user_id: "",
+    pet_id: "",
+    species: "",
+    age_range: "",
+    daily_calories: "",
+    protein_percentage: "",
+    fat_percentage: "",
+    feeding_frequency: "",
+    instructions: "",
+    start_date: "",
+    end_date: "",
+  })
+  const [users, setUsers] = useState([])
+  const [pets, setPets] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [loadingUsers, setLoadingUsers] = useState(false)
+  const [loadingPets, setLoadingPets] = useState(false)
+
   useEffect(() => {
-    const fetchPets = async () => {
-      setLoadingPets(true);
-      try {
-        const response = await apiClient.get('/pets');
-        const petsData = response.data || [];
-        setPets(petsData);
-        
-        // ถ้าไม่มี petId จาก props และมีสัตว์เลี้ยงในระบบ → เลือกตัวแรกอัตโนมัติ
-        if (!petId && petsData.length > 0 && !selectedPetId) {
-          setSelectedPetId(petsData[0].id);
-        }
-      } catch (err) {
-        console.error('Failed to fetch pets:', err);
-        setError('ไม่สามารถโหลดข้อมูลสัตว์เลี้ยงได้');
-      } finally {
-        setLoadingPets(false);
-      }
-    };
-    
-    fetchPets();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    fetchUsers()
+  }, [])
 
-  // ดึงข้อมูลสัตว์เลี้ยงที่เลือก
   useEffect(() => {
-    if (selectedPetId && pets.length > 0) {
-      const pet = pets.find(p => p.id === selectedPetId);
-      setSelectedPet(pet || null);
-    } else if (petId) {
-      // ถ้ามี petId จาก props ให้หา pet จาก pets array
-      const pet = pets.find(p => p.id === petId);
-      setSelectedPet(pet || null);
+    if (formData.user_id) {
+      fetchPetsByUser(formData.user_id)
     } else {
-      setSelectedPet(null);
+      setPets([])
+      setFormData(prev => ({ ...prev, pet_id: "" }))
     }
-  }, [selectedPetId, pets, petId]);
+  }, [formData.user_id])
+
+  const fetchUsers = async () => {
+    try {
+      setLoadingUsers(true)
+      const response = await apiClient.get("/admin/users")
+      setUsers(response.data.filter(user => user.role === "user"))
+    } catch (error) {
+      console.error("Failed to fetch users:", error)
+      setError("ไม่สามารถโหลดรายชื่อผู้ใช้ได้")
+    } finally {
+      setLoadingUsers(false)
+    }
+  }
+
+  const fetchPetsByUser = async (userId) => {
+    try {
+      setLoadingPets(true)
+      const response = await apiClient.get(`/pets/user/${userId}`)
+      setPets(response.data)
+    } catch (error) {
+      console.error("Failed to fetch pets:", error)
+      setError("ไม่สามารถโหลดรายชื่อสัตว์เลี้ยงได้")
+      setPets([])
+    } finally {
+      setLoadingPets(false)
+    }
+  }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormData({
+      ...formData,
+      [name]: value,
+    })
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    setError('');
+    e.preventDefault()
+    setLoading(true)
+    setError("")
 
     try {
-      // One Active Plan Per Pet: Always create a new plan
-      // Old plans will be auto-deactivated by backend
-      if (!selectedPetId) {
-        setError('กรุณาเลือกสัตว์เลี้ยง');
-        setSaving(false);
-        return;
+      // สร้าง nutrition guideline ก่อน
+      const guidelineData = {
+        species: formData.species,
+        age_range: formData.age_range,
+        daily_calories: parseInt(formData.daily_calories),
+        protein_percentage: parseFloat(formData.protein_percentage),
+        fat_percentage: parseFloat(formData.fat_percentage),
+        feeding_frequency: parseInt(formData.feeding_frequency),
+        instructions: formData.instructions,
       }
+
+      const guidelineResponse = await apiClient.post("/nutrition/guidelines", guidelineData)
+      const guidelineId = guidelineResponse.data.id
+
+      // สร้าง pet nutrition plan
+      const planData = {
+        pet_id: formData.pet_id,
+        guideline_id: guidelineId,
+        start_date: formData.start_date,
+        end_date: formData.end_date || null,
+        custom_instructions: formData.instructions,
+      }
+
+      const planResponse = await apiClient.post("/nutrition/plans", planData)
       
-      const response = await apiClient.post('/nutrition/vet-recommendation', {
-        pet_id: selectedPetId,
-        custom_instructions: instructions,
-        custom_calories: calories ? parseInt(calories) : null
-      });
-      
-      onSave(response.data);
-    } catch (err) {
-      const errorMessage = err.response?.data?.error || 'ไม่สามารถบันทึกคำแนะนำได้';
-      setError(errorMessage);
-      console.error('Failed to save vet recommendation:', err);
+      onNutritionAdded(planResponse.data)
+      onClose()
+    } catch (error) {
+      console.error("Nutrition creation error:", error)
+      setError(error.response?.data?.error || "เกิดข้อผิดพลาดในการสร้างแผนโภชนาการ")
     } finally {
-      setSaving(false);
+      setLoading(false)
     }
-  };
+  }
+
+  const selectedUser = users.find(user => user.id === formData.user_id)
+  const selectedPet = pets.find(pet => pet.id === formData.pet_id)
 
   return (
-    <div className="card mt-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
-        สร้างแผนโภชนาการใหม่
-      </h3>
-      <p className="text-sm text-gray-600 mb-4">
-        แผนใหม่จะแทนที่แผนปัจจุบัน และแผนเก่าจะถูกเก็บเป็นประวัติอัตโนมัติ
-      </p>
-      <form onSubmit={handleSubmit}>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        
-        {/* Pet Selection */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            เลือกสัตว์เลี้ยง <span className="text-red-500">*</span>
-          </label>
-          {loadingPets ? (
-            <div className="text-gray-500">กำลังโหลดข้อมูลสัตว์เลี้ยง...</div>
-          ) : (
-            <select
-              value={selectedPetId}
-              onChange={(e) => setSelectedPetId(e.target.value)}
-              className="form-select w-full"
-              required
-            >
-              <option value="">-- เลือกสัตว์เลี้ยง --</option>
-              {pets.map((pet) => (
-                <option key={pet.id} value={pet.id}>
-                  {pet.name} ({pet.species} - {pet.breed || 'ไม่ระบุพันธุ์'})
-                </option>
-              ))}
-            </select>
-          )}
-          {pets.length === 0 && !loadingPets && (
-            <p className="text-sm text-gray-500 mt-1">ไม่พบข้อมูลสัตว์เลี้ยงในระบบ</p>
-          )}
-          {selectedPet && (
-            <div className="mt-2 p-3 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-800">
-                <strong>สัตว์เลี้ยงที่เลือก:</strong> {selectedPet.name}
-              </p>
-              <p className="text-xs text-blue-600">
-                {selectedPet.species} - {selectedPet.breed || 'ไม่ระบุพันธุ์'} | 
-                น้ำหนัก: {selectedPet.weight ? `${selectedPet.weight} กก.` : 'ไม่ระบุ'} | 
-                เจ้าของ: {selectedPet.users?.full_name || 'ไม่ระบุ'}
-              </p>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b">
+          <h2 className="text-2xl font-bold text-gray-900">สร้างแผนโภชนาการ</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-red-600 text-sm">{error}</p>
             </div>
           )}
-        </div>
-        
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            แคลอรี่ต่อวัน (kcal)
-          </label>
-          <input
-            type="number"
-            value={calories}
-            onChange={(e) => setCalories(e.target.value)}
-            className="form-input w-full"
-            placeholder="เช่น 350"
-            min="0"
-          />
-        </div>
-        
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            คำแนะนำโภชนาการ
-          </label>
-          <textarea
-            value={instructions}
-            onChange={(e) => setInstructions(e.target.value)}
-            rows="5"
-            className="form-textarea w-full"
-            placeholder="กรอกคำแนะนำโภชนาการสำหรับสัตว์เลี้ยง..."
-            required
-          />
-        </div>
-        
-        <div className="flex justify-end gap-4 mt-4">
-          <button type="button" onClick={onCancel} className="btn-secondary">
-            <X size={18} className="mr-2" />
-            ยกเลิก
-          </button>
-          <button type="submit" className="btn-primary" disabled={saving}>
-            <Save size={18} className="mr-2" />
-            {saving ? 'กำลังสร้างแผน...' : 'สร้างแผนใหม่'}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-};
 
-export default VetNutritionForm;
+          {/* เลือกผู้ใช้และสัตว์เลี้ยง */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <User className="h-5 w-5 text-blue-500" />
+              <h3 className="text-lg font-semibold text-gray-900">เลือกผู้ใช้และสัตว์เลี้ยง</h3>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="user_id" className="block text-sm font-medium text-gray-700 mb-2">
+                  เลือกผู้ใช้ *
+                </label>
+                <select
+                  id="user_id"
+                  name="user_id"
+                  value={formData.user_id}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                  disabled={loadingUsers}
+                >
+                  <option value="">เลือกผู้ใช้</option>
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.full_name} ({user.email})
+                    </option>
+                  ))}
+                </select>
+                {loadingUsers && (
+                  <p className="text-sm text-gray-500 mt-1">กำลังโหลด...</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="pet_id" className="block text-sm font-medium text-gray-700 mb-2">
+                  เลือกสัตว์เลี้ยง *
+                </label>
+                <select
+                  id="pet_id"
+                  name="pet_id"
+                  value={formData.pet_id}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                  disabled={!formData.user_id || loadingPets}
+                >
+                  <option value="">เลือกสัตว์เลี้ยง</option>
+                  {pets.map((pet) => (
+                    <option key={pet.id} value={pet.id}>
+                      {pet.name} ({pet.species})
+                    </option>
+                  ))}
+                </select>
+                {loadingPets && (
+                  <p className="text-sm text-gray-500 mt-1">กำลังโหลด...</p>
+                )}
+                {!formData.user_id && (
+                  <p className="text-sm text-gray-500 mt-1">กรุณาเลือกผู้ใช้ก่อน</p>
+                )}
+              </div>
+            </div>
+
+            {/* แสดงข้อมูลที่เลือก */}
+            {selectedUser && selectedPet && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <User className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-900">
+                      {selectedUser.full_name}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <PawPrint className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-900">
+                      {selectedPet.name} ({selectedPet.species})
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ข้อมูลโภชนาการ */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Utensils className="h-5 w-5 text-green-500" />
+              <h3 className="text-lg font-semibold text-gray-900">ข้อมูลโภชนาการ</h3>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="species" className="block text-sm font-medium text-gray-700 mb-2">
+                  ชนิดสัตว์ *
+                </label>
+                <select
+                  id="species"
+                  name="species"
+                  value={formData.species}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+                  <option value="">เลือกชนิดสัตว์</option>
+                  <option value="dog">สุนัข</option>
+                  <option value="cat">แมว</option>
+                  <option value="bird">นก</option>
+                  <option value="rabbit">กระต่าย</option>
+                  <option value="other">อื่นๆ</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="age_range" className="block text-sm font-medium text-gray-700 mb-2">
+                  ช่วงอายุ *
+                </label>
+                <select
+                  id="age_range"
+                  name="age_range"
+                  value={formData.age_range}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+                  <option value="">เลือกช่วงอายุ</option>
+                  <option value="0-6 months">0-6 เดือน</option>
+                  <option value="6-12 months">6-12 เดือน</option>
+                  <option value="1-2 years">1-2 ปี</option>
+                  <option value="2-5 years">2-5 ปี</option>
+                  <option value="5+ years">5+ ปี</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="daily_calories" className="block text-sm font-medium text-gray-700 mb-2">
+                  แคลอรี่ต่อวัน *
+                </label>
+                <input
+                  type="number"
+                  id="daily_calories"
+                  name="daily_calories"
+                  value={formData.daily_calories}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="เช่น 300"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="feeding_frequency" className="block text-sm font-medium text-gray-700 mb-2">
+                  จำนวนมื้อต่อวัน *
+                </label>
+                <input
+                  type="number"
+                  id="feeding_frequency"
+                  name="feeding_frequency"
+                  value={formData.feeding_frequency}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="เช่น 2"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="protein_percentage" className="block text-sm font-medium text-gray-700 mb-2">
+                  เปอร์เซ็นต์โปรตีน *
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  id="protein_percentage"
+                  name="protein_percentage"
+                  value={formData.protein_percentage}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="เช่น 25.0"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="fat_percentage" className="block text-sm font-medium text-gray-700 mb-2">
+                  เปอร์เซ็นต์ไขมัน *
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  id="fat_percentage"
+                  name="fat_percentage"
+                  value={formData.fat_percentage}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="เช่น 15.0"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="instructions" className="block text-sm font-medium text-gray-700 mb-2">
+                คำแนะนำเพิ่มเติม
+              </label>
+              <textarea
+                id="instructions"
+                name="instructions"
+                value={formData.instructions}
+                onChange={handleChange}
+                rows="3"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="คำแนะนำเพิ่มเติมสำหรับการให้อาหาร..."
+              />
+            </div>
+          </div>
+
+          {/* ระยะเวลาแผน */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Calendar className="h-5 w-5 text-purple-500" />
+              <h3 className="text-lg font-semibold text-gray-900">ระยะเวลาแผน</h3>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="start_date" className="block text-sm font-medium text-gray-700 mb-2">
+                  วันที่เริ่มต้น *
+                </label>
+                <input
+                  type="date"
+                  id="start_date"
+                  name="start_date"
+                  value={formData.start_date}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="end_date" className="block text-sm font-medium text-gray-700 mb-2">
+                  วันที่สิ้นสุด (ไม่บังคับ)
+                </label>
+                <input
+                  type="date"
+                  id="end_date"
+                  name="end_date"
+                  value={formData.end_date}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  หากไม่ระบุ จะเป็นแผนระยะยาว
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* ปุ่มส่งคำขอ */}
+          <div className="flex space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="submit"
+              disabled={loading || !formData.user_id || !formData.pet_id}
+              className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>กำลังสร้างแผน...</span>
+                </>
+              ) : (
+                <>
+                  <Utensils className="h-4 w-4" />
+                  <span>สร้างแผนโภชนาการ</span>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+export default VetNutritionForm

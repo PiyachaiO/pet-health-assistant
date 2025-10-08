@@ -366,11 +366,8 @@ const NutritionRecommendation = () => {
         {/* Vet Form */}
         {user?.role === 'veterinarian' && showVetForm && (
             <VetNutritionForm
-                petId={petId || null}
-                existingRecommendation={vetRecommendation?.custom_instructions}
-                planId={vetRecommendation?.id}
-                onSave={handleVetRecSaved}
-                onCancel={() => setShowVetForm(false)}
+                onClose={() => setShowVetForm(false)}
+                onNutritionAdded={handleVetRecSaved}
             />
         )}
 
