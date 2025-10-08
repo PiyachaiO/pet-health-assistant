@@ -83,7 +83,7 @@ const VetNutritionForm = ({ onClose, onNutritionAdded }) => {
       }
 
       const guidelineResponse = await apiClient.post("/nutrition/guidelines", guidelineData)
-      const guidelineId = guidelineResponse.data.id
+      const guidelineId = guidelineResponse.data.guideline.id
 
       // สร้าง pet nutrition plan
       const planData = {
