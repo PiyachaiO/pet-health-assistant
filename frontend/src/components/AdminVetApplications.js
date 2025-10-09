@@ -47,11 +47,14 @@ const AdminVetApplications = () => {
       params.append("page", currentPage)
       params.append("limit", 10)
 
+      console.log('Fetching vet applications with params:', params.toString())
       const response = await apiClient.get(`/vet-applications/admin?${params}`)
+      console.log('Vet applications response:', response.data)
       setApplications(response.data.applications || [])
       setTotalPages(response.data.pagination?.totalPages || 1)
     } catch (error) {
       console.error("Failed to fetch applications:", error)
+      console.error("Error response:", error.response?.data)
       setError("ไม่สามารถโหลดข้อมูลคำขอได้")
     } finally {
       setLoading(false)
@@ -60,10 +63,13 @@ const AdminVetApplications = () => {
 
   const fetchStats = async () => {
     try {
+      console.log('Fetching vet applications stats...')
       const response = await apiClient.get("/vet-applications/admin/stats")
+      console.log('Vet applications stats response:', response.data)
       setStats(response.data)
     } catch (error) {
       console.error("Failed to fetch stats:", error)
+      console.error("Error response:", error.response?.data)
     }
   }
 

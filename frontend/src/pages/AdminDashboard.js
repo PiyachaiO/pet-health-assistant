@@ -114,10 +114,13 @@ const AdminDashboard = () => {
       // Process vet applications stats
       if (vetAppsStatsResponse.status === 'fulfilled') {
         const vetAppsStats = vetAppsStatsResponse.value.data
+        console.log('Vet applications stats:', vetAppsStats)
         setStats(prevStats => ({
           ...prevStats,
           pending_vet_applications: vetAppsStats.pending_applications || 0
         }))
+      } else {
+        console.error('Vet applications stats failed:', vetAppsStatsResponse.reason)
       }
     } catch (error) {
       console.error("Failed to fetch admin data:", error)
